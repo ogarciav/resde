@@ -1,0 +1,521 @@
+% Compile with 'R CMD Sweave xx.Rnw'
+%   or 'Rscript -e "library(knitr);knit(xx.Rnw)"'
+% In the package DESCRIPTION file specify:
+%   VignetteBuilder: knitr
+%   Suggests: knitr
+% For RStudio installation to compile vignettes use
+%   'devtools::install(build_vignettes = TRUE)'
+
+\documentclass[12pt]{article}
+
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{Fitting Reducible SDE Models}
+
+\usepackage[utf8]{inputenc}
+\usepackage{charter,inconsolata}
+\usepackage[T1]{fontenc}
+\PassOptionsToPackage{hyphens}{url}
+\usepackage[breaklinks]{hyperref}
+\hypersetup{pdfstartview={FitH -32768},pdfborder={0 0 0},
+            bookmarksopen}
+
+% --- math  ---
+\usepackage{amsmath,bm}
+\newcommand{\vc}[1]{\bm{#1}}
+\newcommand{\mat}[1]{{\mathrm #1}}  % or \bf
+\newcommand{\der}[2]{\frac{{\mathrm d}#1}{{\mathrm d}#2}}
+\newcommand{\pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\dr}[2]{{\mathrm d}#1/{\mathrm d}#2}
+\newcommand{\dd}{\,{\mathrm d}}
+%\newcommand{\mod}[1]{_{(\mbox{\scriptsize mod }#1)}} % see also pmod
+\newcommand{\diag}{\mathop{\mathgroup\simoperators diag}\nolimits}
+% or \newcommand{\diag}{\,\mbox{diag}}
+\newcommand{\abs}{\mathop{\mathgroup\simoperators abs}\nolimits}
+% or \newcommand{\abs}{\mbox{abs}}
+\providecommand{\e}{\mathrm e} % included in amsmath?
+\DeclareMathOperator{\sgn}{sgn}
+\newcommand{\absv}[1]{\lvert #1 \rvert}
+
+% ---  bibliography  ---
+\usepackage{natbib}
+%default:  \bibpunct{(}{)}{;}{a}{,}{,}
+%\bibliographystyle{elsart-harv}
+
+% ---  floats ---
+%\usepackage[pdftex]{graphicx}
+
+\newcommand{\captionfont}{\small} % or {\sf}
+% or \newcommand{\captionfont}{}
+
+% [width], tag, caption
+\newcommand{\fig}[3][]{\begin{figure}[htbp]\leavevmode\centering%
+\includegraphics[width=#1\textwidth]{#2.pdf}\caption{\captionfont #3}\label{fig:#2}\end{figure}}
+
+\hypersetup{
+ pdfauthor={Oscar Garcia},%
+ pdftitle={%{TITLE}%
+ Fitting Reducible SDE Models
+}%
+%%,pdfkeywords={}%
+}
+
+\newcommand{\lang}[1]{\textbf{#1}}
+\newcommand{\pkg}[1]{\textbf{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
+
+%% Fix wrapping of long lines in R output %%
+% Thanks to Scott Pakin, author of \spverbatim
+\makeatletter
+\let\orig@verbatim=\verbatim
+\begingroup
+  \catcode`|=0
+  \catcode`[=1
+  \catcode`]=2
+  \catcode`\{=12
+  \catcode`\}=12
+  \catcode`\\=12
+  |gdef|spv@xverbatim#1\end{verbatim}[#1|end[verbatim]]
+|endgroup
+\renewenvironment{verbatim}{%
+  \def\@xobeysp{\mbox{}\space}%
+  \let\@xverbatim=\spv@xverbatim
+  \orig@verbatim
+}{%
+}
+\makeatother
+
+
+
+
+\title{Fitting Reducible SDE Models}
+\author{Vignette for \pkg{resde}}  % Oscar Garc\'ia
+\date{Draft, \today}
+
+\begin{document}
+\maketitle
+
+\setcounter{tocdepth}{4}
+\tableofcontents
+
+
+<<setup, include=FALSE, cache=FALSE>>=
+library(knitr)
+opts_chunk$set(fig.align='center', # fig.show='hold',
+dev='pdf', out.width='.45\\textwidth') # , highlight=FALSE)
+options(width=67)
+@
+
+
+\section{Introduction}
+\label{sec:intro}
+
+Package \pkg{resde} computes maximum-likelihood (ML) parameter estimates for reducible stochastic differential equation (RSDE, more on those in a minute). Observations are at discrete points in time, not necesarily evenly spaced, and may include measurement error. Currently, \pkg{resde} handles only univariate time-independent RSDEs, some types of multivariate models might be added in the future. In the simplest case, there is a single individual or sampling unit (\emph{unit}, for short). Alternatively, there may be a set of units, with some parameters common to all units (\emph{global}), and others specific to each unit (\emph{local}). Estimation in these \emph{two-levels hierarchical models} can use either fixed effects methods, or more fashionable mixed effects methods.
+
+RSDEs are SDEs that can be reduced to linear by a change of variables. This may seem unduly restrictive, but we shall see that many important problems can be formulated this way. In particular, linearizing transformations exist for most of the univariate growth models from the literature. Esentially, any differential equation with an invertible closed-form solution can be linearized (section \ref{sec:more}).
+
+In \citet{sdes}, I showed an \lang{R} function, \code{uvector()}, that generates a certain sum of squares that minimized produces ML estimates (\emph{not} least-squares estimates). That worked, but the incantations needed could become rather complex and less than intuitive. Package \pkg{resde} offers a more user-friendly front-end. There are two main functions: \code{sdemodel()} specifies the model form and initial conditions --- for a unit in case of hierarchical models. That includes the variable transformation, any re-parameterizations, and the existence or not of process, measurement, and initial condition noise. Then, \code{sdefit()} uses \code{uvector()} internally to perform the estimation, given the model defined by \code{sdemodel()}, the data, and starting parameter guesses. For hierarchical models, one must also identify the parameters as globals or locals, and indicate if fixed or mixed effects are to be used.
+
+Section 3 of \citet{sdes} provides a quick introduction to SDEs. \citet{sys} might be useful for those not comfortable with dynamical systems.
+
+The following section describes the model equations, and how they are specified in \code{sdemodel()}. Section \ref{sec:noh} Explains the use of \code{sdefit()} for single-unit models, and section \ref{sec:hier} does the same for hierarchical ones. We go over all the SDE examples from \citet{sdes}, where a few additional details are given. Finally, section \ref{sec:more} covers some non-essential odds and ends.
+
+
+\section{The model}
+\label{sec:model}
+
+We assume that there is some transformation of the variable of interest $X$,
+\begin{equation} \label{eq:phi}
+    Y = \varphi(X) \;,
+\end{equation}
+possibly containing unknown parameters, such that $Y$ for a unit follows a linear SDE
+\begin{equation} \label{eq:sde}
+    \dd Y = (\beta_0 + \beta_1 Y) \dd t + \mu_p \sigma_p \dd W \;,
+\end{equation}
+with a posibly random initial condition
+\begin{equation} \label{eq:ic}
+    Y(t_0) = \varphi(x_0) + \mu_0 \epsilon_0 \;; \quad \epsilon_0 \sim N(0, \sigma_0^2) \;.
+\end{equation}
+That is, $X$ obeys a \emph{reducible} (to linear) SDE. There are $n$ possibly noisy observations $x_i$ such that
+\begin{multline} \label{eq:obs}
+    y_i = \varphi(x_i) = Y(t_i) + \mu_m \epsilon_i \;;\quad i = 1, \dots, n \;; \\
+      t_0 < t_1 < \cdots < t_n  \;;\quad \epsilon_i \sim N(0, \sigma_m^2) \;.
+\end{multline}
+The $\epsilon_i$ are mutually independent, and independent of the Wiener (aka Brownian motion) random process $W(t)$.
+
+There may be a re-parameterization, where any of the ``base'' parameters $\beta_0$, $\beta_1$, $t_0$, $y_0$, $\mu_p$, $\mu_0$, $\mu_m$ can be replaced by functions of new parameters. For instance, an SDE
+\[  \dd X^c = b(a^c - X^c) \dd t + \sqrt{b} \dd W \;,\]
+with initial condition fixed at the origin,
+can be specified by the transformation $Y = \varphi(X, c) = X^c$, and the parameter substitutions $\beta_0 \rightarrow b a^c, \beta_1 \rightarrow -b, \mu_p \rightarrow \sqrt{b},
+t_0, x_0, \mu_0 \rightarrow 0$. If there are no measurement errors, one would set $\mu_m \rightarrow 0$.
+
+In \pkg{resde}, the model specification is done with function \code{sdemodel()}. The arguments and defaults are:
+<<sdemodel, eval=FALSE>>=
+sdemodel(phi=~x, phiprime=NULL, beta0=~beta0, beta1=~beta1, t0=0,
+         x0=0, mu0=0, mup=1, mum=1)
+@
+\noindent
+The values are either constants, or formulas with an empty left-hand side. The optional \code{phiprime} can be an expression for the derivative of $\varphi$ with respect to $x$. If the derivative is not given, it is automatically generated with the \pkg{Deriv} package. The result from \code{sdemodel()} is used by the estimation function \code{sdefit()}.
+
+Assume that \pkg{resde} is properly installed. For the example above,
+<<>>=
+library(resde)
+exmpl <- sdemodel(phi=~x^c, beta0=~b*a^c, beta1=~-b, mup=~sqrt(b))
+@
+\noindent
+Always check the displayed result to see if that is what you meant. The display can be obtained again with \verb|sdemodel_display(exmpl)|. More examples below.
+
+
+\section{Single-unit estimation}
+\label{sec:noh}
+
+The following are the \code{sdefit()} arguments relevant to fitting an RSDE model to a single individual or sampling unit:
+\code{sdefit(model, x, t, data=NULL, start=NULL, known=NULL)}.
+The output of \code{sdemodel()} is passed in the argument \code{model}. Arguments \code{x} and \code{t} are either data vectors, or names for the relevant columns in the data frame \code{data}. A named vector or list \code{start} gives starting parameter values for the optimization. The optional named vector or list \code{known} can contain parameters fixed at given values for a particular estimation run, as an alternative to calling \code{sdemodel()} again.
+
+The output of \code{sdefit()} is a list with two componentds, named \code{fit} and \code{more}. The first, \code{fit}, is the result of the minimization of the sum of squares from \code{uvector()}, performed by the nonlinear least-squares function \code{nls()}. It contains the ML parameter estimates, except for the $\sigma$'s. The second component, \code{more}, gives the $\sigma$ estimates, the maximized log-likelihood value, and AIC and BIC statistics.
+
+\subsection{Example 1, single unit with additive process noise}
+
+This example is from section 3.2.1 and Appendix C.1 of \citet{sdes}.
+
+\code{Loblolly} is a data set included with \pkg{R}, containing height and age data for 14 trees. Heights $h_i = H(t_i)$ are in feet, and ages $t_i$ are in years. For this example we use the 6 observations from the first tree, tree \#301:
+<<>>=
+lob301 <- Loblolly[Loblolly$Seed == 301, ]
+@
+
+A suitable mdel is
+\begin{equation*}
+    \der{H^c}{t} = b(a^c - H^c) \;,
+\end{equation*}
+which on integration gives the commonly used Richards growth curve. The special case $c = -1$ gives the logistic, and $c$ close to 0 approximates the Gompertz curve, two models that have been used in previous analyses of this data. Let the height be 0 at age 0.
+
+Assume additive process noise
+\begin{equation*}
+    \dd H^c = b(a^c - H^c) \dd t + \sigma_p \dd W \;,
+\end{equation*}
+and measurement error
+\begin{equation*}
+    h_i^c = H^c(t_i) + \epsilon_i \;,
+\end{equation*}
+where the $\epsilon_i$ are normally distributed with mean 0 and variance $\sigma_m^2$.
+
+In \pkg{resde}, the model specification is
+<<>>=
+m <- sdemodel(phi=~x^c, beta0=~b*a^c, beta1=~-b)  # else, defaults
+@
+\noindent
+
+Now, the parameter estmation:
+<<>>=
+f <- sdefit(m, x="height", t="age", data=lob301,
+            start=c(a=60, b=0.1, c=1))
+f
+@
+\noindent
+The parameter estimates are $a = 72.55$, $b = 0.0967$, $c =
+0.5024$, $\sigma_p = 0$, and $\sigma_m = 0.04865$, with a maximized log-likelihood value
+of $-4.0$. I'll explain \code{eta} shortly. This would suggest that most of the variability arises from measurement errors. However, $\sigma_p = 0$ is at the boundary of the admissible values, and therefore this could easily be a local optimum different from the global one. To confirm, we try forcing instead $\sigma_m=0$, as suggested by the warning:
+<<>>=
+m <- sdemodel(phi=~x^c, beta0=~b*a^c, beta1=~-b, mum=0)
+sdefit(m, x="height", t="age", data=lob301,
+       start=c(a=60, b=0.1, c=1))
+@
+\noindent
+The log-likelihood is a little worse at $-5.1$ (the AIC and BIC are not directly comparable, because there is one less free parameter). Only log-likelihood differences are relevant, and some arguments suggest that differences of around 2 units might be considered as ``significant''. Therefore, this data does not provide enough information about the values of the two sigmas. One could also say that the model is over-parameterized. This seems to be typical, at least with short time series.
+
+As mentioned before, the first component in the output from \code{sdefit()} is the output from \code{nls()}. It shows the \code{uvector()} call used in \citet{sdes}, this time automatically generated within \code{sdefit()}. There, \code{eta} is the relative measurement variance $\eta = \frac{\sigma_m^2}{\sigma_p^2 + \sigma_m^2}$. In the first run, $\eta$ was constrained to be between 0 and 1 by using algorithm \code{port} in \code{nls()}, which allows bounds on the optimization variables.
+
+A little more information can be extracted from the \code{nls{}} fit:
+<<>>=
+summary(f$fit)
+@
+
+
+ 
+\subsection{Example 2, single unit with multiplicative process noise}
+
+Section 3.2.1 and Appendix C.2 of \citet{sdes}.
+
+In the previous example, consider now a multiplicative process noise instead of additive:
+\begin{equation*}
+    \dd H^c = b(a^c - H^c)(\dd t + \sigma_p \dd W) =
+              b(a^c - H^c)\dd t + b \sigma_p (a^c - H^c)\dd W \;.
+\end{equation*}
+The so-called Lamperti transform leads to a model
+\begin{equation*}
+    \dd Y = -b \dd t + b \sigma_p \dd W \;,
+\end{equation*}
+with
+\begin{equation*}
+    Y = \varphi(H) = \ln\absv{a^c - H^c} \;.
+\end{equation*}
+Assume measurement errors of the form
+\begin{equation*}
+    y_i = Y(t_i) + \epsilon_i \;, \quad \epsilon_i \sim {\mathrm N}(0, \sigma_m^2) \;.
+\end{equation*}
+
+In \pkg{resde},
+<<>>=
+m <- sdemodel(~log(abs(a^c - x^c)), beta0=~-b, beta1=0, mup=~b)
+sdefit(m, x="height", t="age", data=lob301,
+       start=c(a=70, b=0.1, c=1))
+@
+\noindent
+The derivative produced by \code{Deriv::Deriv()} is a little messy, but it works. On esthetic grounds, one might include in \code{sdemodel{}} the simpler equivalent \verb|phiprime = c*x^(c-1)/(x^c - a^c)|.
+
+The log-likelihood is not significantly different from the one from the additive model. Not much difference either in the fitted curves:
+<<>>=
+plot(c(0,height) ~ c(0, age), data=lob301)
+curve(77.10687 * (1 - exp(-0.08405 * x))^(1/0.54946), add=T,
+      col="red")
+curve(72.5459 * (1 - exp(-0.0967 * x))^(1/0.5024), add=T,
+      col="blue")
+@
+\noindent
+
+As with any optimization one should be careful, trying different starting values, because local optima can occur. For instance, in the last run, changing the start to \code{a=60} produces a different solution.
+
+
+\section{Hierarchical (two-levels) models}
+\label{sec:hier}
+
+Often the data consists of several measurements on each of a number of units. For instance, the measurements on each of the 14 trees in \code{Loblolly}. This is known as panel, repeated measures, or longitudinal data, and gives rise
+to hierarchical or multilevel models; \pkg{resde} can deal with two hierarchical levels. Some parameters may vary among units (local), while others are common to all
+units (global), possibly after a re-parameterization of the original model. Local parameters may be treated as fixed unknown values. Frequently, interest lies mainly on the globals, and the locals are then called nuisance parameters.
+
+A popular alternative is to think of the local parameters as, in some sense,  ``random''.  For instance, the data may be thought of as a random sample from some hypothetical super-population, in which the local parameters have a Normal distribution.  In mixed-effects terminology, the globals and the means of the locals are \emph{fixed effects}, while the deviations of the locals from their means are \emph{random effects}, usually normally distributed. The units are called \emph{groups} (of observations). The advantage is that then there are less parameters to be estimated: instead of one local value for each unit, there is now only a mean and a variance, and possibly also covariances between locals. On the other hand, all these are additional assumptions. In particular, the assumptions are not realistic if the units are not a simple random sample from the population. Also, estimation is more complicated, and not as robust as minimizing a sum of squares.
+
+\subsection{Example 3, fixed local parameters}
+
+Section 3.3.1 and Appendix E of \citet{sdes}.
+
+Consider fitting Richards SDE models simultaneously to all the 14 trees
+in the \code{Loblolly} data set. The parameterization can be important here,
+so we use the Box-Cox transformation, ensuring that $a$ and
+$b$ are proper scale parameters:
+\begin{align*}
+    Y = &(H/a)^{(c)} \\
+    \dd Y = &-Y \dd(b t) + \sigma_p \dd W(b t)
+          = -b Y \dd t + \sqrt{\absv{b}} \sigma_p \dd W(t) \;,
+\end{align*}
+where $x^{(c)}$ denotes the Box-Cox transformation
+\begin{equation} \label{eq:bc}
+    x^{(c)} = \begin{cases} \frac{x^c - 1}{c} \text{ if } c \neq 0 \;, \\
+                            \ln x \text{ if } c = 0 \;.
+              \end{cases}
+\end{equation}
+It can be seen that for $c \neq 0$ one obtains the same Richards differential equation as before, but this includes also the Gompertz model for $c=0$.
+
+Assume that the measurement error is negligible compared to the process noise, i.e., $\sigma_m = 0$, and that the curves start at the origin $t = 0, H = 0$.
+
+Using the Box-Cox transformation \code{bc()} included in \pkg{resde}, the model is
+<<>>=
+m <- sdemodel(phi=~bc(x/a, c), beta0=0, beta1=~-b,
+              mup=~sqrt(abs(b)), mum=0)
+@
+\noindent
+\begin{sloppypar}
+Again, the generated derivative is a little more complex than necessary. One could have included \verb|phiprime = (x/a)^(c-1)/a|, or \verb|phiprime = bc_prime(x/a, c)/a|.
+\end{sloppypar}
+
+For hierarchical models, one must indicate a variable that identifies the units in parameter \code{unit} of \code{sdefit()}, \code{"Seed"} in this case. Also, \code{global} and \code{local} are used instead of \code{start}. Starting values for locals can be vectors with one value for each unit, or a single value that applies to all.
+
+First, take $a$ as local, that is, the asymptotes $a_j$ vary from tree to tree:
+<<>>=
+alocal <- sdefit(m, x="height", t="age", unit="Seed",
+          data=Loblolly, global=c(b=0.1, c=0.5), local=c(a=70))
+alocal
+@
+\noindent
+
+Now try $a$ global and $b$ local:
+<<>>=
+(blocal <- sdefit(m, x="height", t="age", unit="Seed",
+           data=Loblolly, global=c(a=70, c=0.5), local=c(b=0.1)))
+@
+\noindent
+The log-likelihood (or
+equivalently, the AIC or BIC) indicates that this model fits the data slightly better
+than the one with $a$ local.
+
+Finally, with both $a$ and $b$ locals,
+<<>>=
+(ablocal <- sdefit(m, x="height", t="age", unit="Seed",
+            data=Loblolly, global=c(c=0.5), local=c(a=70, b=0.1)))
+@
+\noindent
+Here the AIC or BIC have to be used for the comparison, because the number of free parameters is different. For AIC and BIC smaller is better. They indicate that this is worse than the one-local versions.
+
+Other structures could be defined by re-parameterization, substituting
+functions of other global and local parameters for a, b or c.
+
+By the way, if you are mystified by the strangely-looking Box-Cox transformation, eq.~\eqref{eq:bc}, don't be. It is basically a power transformation with a twist, considering that linear (or more precisely affine) transformations are often ``uninteresting''. The point is that the limit $\lim_{c \rightarrow 0} (x^c - 1)/c = \ln x$ makes the transformation continuous at $c=0$, as a function of $c$. Including the logarithm as a special case in the process. Hiding those details inside the definition, the use of $x^{(c)}$ saves us the hassle of having to talk about the special case all the time. And the logarithmic transformation comes along for free. We'll come back to this, with a vengeance, in Section \ref{sec:more}. Physicists discovered the transformation independently, looking from the other end, calling it a \emph{generalized logarithm} denoted by $\ln_c(x)$.
+
+
+\subsection{Example 4, random local parameters}
+
+Section 3.3.2 and Appendix F of \citet{sdes}.
+
+The mixed effects method uses \code{nlme()} instead of \code{nls()}. This is chosen by setting \code{method = "nlme"} in \code{sdefit()} (the default is \code{"nls"}).
+
+Let us fit the $b$-local version from Example 3:
+<<r, error=TRUE, purl=FALSE>>=
+(blocal_mx <- sdefit(m, x="height", t="age", unit="Seed",
+              data=Loblolly, global=c(a=70, c=0.5), local=c(b=0.1),
+              method="nlme"))
+@
+\noindent
+Convergence fails. There is an optional parameter \code{control} in \code{sdefit()}, which acepts a list of control parameters to be passed on to \code{nlme()} or \code{nls()}. Use it to increase the ``PNLS tolerance'' to 0.01, from the default 0.001:
+<<>>=
+(blocal_mx <- sdefit(m, x="height", t="age", unit="Seed",
+              data=Loblolly, global=c(a=70, c=0.5), local=c(b=0.1),
+              method="nlme", control = nlme::nlmeControl(pnlsTol =
+              0.01)))
+@
+\noindent
+This time it worked. The log-likelihood is not comparable to the one for fixed locals (different numbers of parameters), but we can compare the AIC and BIC criteria. The AIC values, 214 \emph{vs.\ } 204 in Example 3, would suggest that in this instance fixed locals is better than mixed effects. However, the opposite is true according to the BIC, 226 \emph{vs.\ } 246. This is because the BIC penalizes the difference in parameter numbers more heavily than the AIC.
+
+In this formulation $b$ is a random variable, so that it does not make sense to speak of \emph{estimates}, but \code{nlme()} provides ``predictions'':
+<<>>=
+coef(blocal_mx$fit)
+@
+\noindent
+
+
+\section{Additional features and advanced usage}
+\label{sec:more}
+
+\subsection{Derivatives}
+
+\code{Deriv()} seems to do a good job of producing transformation derivatives, although as we have seen, sometimes not in the simplest possible form. If desired, the argument \code{phiprime} can be used. Either way, \code{sdefit()} generates global functions \code{phi()} and \code{phiprime()} to compute transformation and derivatives, respectively. For trouble-shooting, setting \code{trfums=FALSE} in \code{sdefit()} suppresses the generation of these functions, allowing the user to provide his/her own. If necessary, you can inspect the generated \code{phi()} and \code{phiprime()} to see the proper format.
+
+\subsection{Under the hood}
+
+The aim of \pkg{resde} is to facilitate the application of the function \code{uvector()} from \citet{sdes}. That function uses tricks based on work by Furnival and by Box and Cox, to compute values such that minimizing the sum of their squares produces maximum-likelihood parameter estimates. The sum of squares is minimized with \code{nls()} from package \pkg{stats}, or with \code{nlme()} from package \pkg{nlme}. Setting up a call of \code{uvector()}, as done in \citet{sdes}, can be rather complicated, a process that is ``mechanized'' by \code{sdemodel()} and \code{sdefit()}. The generated call of \code{uvector()} can be seen with \code{formula(f\$fit)} and \code{(f\$fit)\$call}, where \code{f} is the output from \code{sdefit()}. Conceivably, there may be applications where it could be necessary to use \code{uvector()} directly.
+
+When there is both process and measurement noise, \pkg{resde} uses internally an additional parameter, \code{eta}, that corresponds to the relative measurement error $\eta = \sigma_m^2 / (\sigma_p^2 + \sigma_m^2)$. It must take values between 0 ($\sigma_m = 0$), and 1 ($\sigma_p = 0$). With \code{nls()}, algorithm \code{port} performs the constrained optimization. For mixed effects, \code{nlme()} does not allow constraints. Therefore, \code{optimize()} is used in that case to perform a one-dimensional optimization over \code{eta}, calling \code{nlme{}} at each step.
+
+Here is an example, freeing $\sigma_m$ in the $b$-local model of Example 3:
+<<>>=
+m <- sdemodel(phi=~bc(x/a, c), beta0=0, beta1=~-b,
+              mup=~sqrt(abs(b)))
+sdefit(m, x="height", t="age", unit="Seed", data=Loblolly, 
+       global=c(a=70, c=0.5), local=c(b=0.1))
+@
+\noindent
+Note the call to \code{uvector()} in the \emph{model} item from \code{nls()}, and the presence of the parameter \code{eta}. Estimates were the same as before. The AIC and BIC differ because of the additional parameter. We explore further the error structure next. 
+
+
+\subsection{Fixing \code{eta}}
+
+We already saw how to specify models without measurement error or without process noise by setting the sigma multipliers \code{mum=0} or \code{mup=0}, respectively. For more flexibility, there is a ``hidden'' feature for specifying a relative error magnitude through $\eta$ (\code{eta}): the argument \code{known} in \code{sdefit()}, which fixes parameters at given values, accepts also a value for \code{eta}.
+
+Let us use this to investigate the relationship between the maximized log-likelihood and $\eta$, plotting $\eta$'s \emph{profile log-likelihood}:
+<<>>=
+lgLik <- eta <- seq(from=0, to=1, by=0.05)
+for(i in seq_along(eta)){
+  lgLik[i] <- (sdefit(m, x="height", t="age", unit="Seed",
+               data=Loblolly, global=c(a=73, c=0.49),
+               local=c(b=0.095), known=c(eta=eta[i]))$more
+              )["logLik"]
+}   
+plot(lgLik ~ eta)
+@
+\noindent
+We see that there are local optima at $\eta = 0$ ($\sigma_m = 0$), and at $\eta = 1$ ($\sigma_p = 0$). This is what was causing trouble with the optimizations. However, the significance of the log-likelihood differences is marginal. One may conclude that the data cannot tell us much about the error structure, so that we are justified in choosing it from prior knowledge. E.g., if the height observations were derived from tree ring observations, the measurement errors may be negligible compared to the environmental noise, and $\sigma_m = 0$ would be reasonable.
+
+
+\subsection{On transformations}
+
+Consider any growth curve (or other type of) model with trajectories given by some function
+\begin{equation*} \label{eq:gc}
+    x = F(t) \;.
+\end{equation*}
+One can write
+\begin{equation*}
+    F^{-1}(x) = t \;.
+\end{equation*}
+Therefore, the transformation on the left-hand side obeys a (trivial) linear differential equation:
+\begin{equation*}
+    y = F^{-1}(x) \quad \rightarrow \quad \der{y}{t} = 1 \;.
+\end{equation*}
+Any linear function of that transformation will also work:
+\begin{equation} \label{eq:trivial}
+    y = p F^{-1}(x) + q \quad \rightarrow \quad \der{y}{t} = p \;,
+\end{equation}
+for any constants $p \neq 0, q$.
+
+Somewhat more interesting is
+\begin{equation*}
+    y = \exp[F^{-1}(x)] \quad \rightarrow \quad  \der{y}{t} = \exp[F^{-1}(x)] \der{F^{-1}(x)}{t} = y \;.
+\end{equation*}
+Or more generally,
+\begin{equation} \label{eq:linear}
+    y = p \exp[q F^{-1}(x)] + r \quad \rightarrow \quad
+        \der{y}{t} = q (y - r) \;.
+\end{equation}
+In particular cases, $p, q, r$ can be chosen to simplify the transformation.
+
+E.g., for the Richards (or Bertalanffy-Richards) equation,
+\begin{gather*}
+      x = F(t) = a[1 - \sgn(c) \e^{-b(t - t_0)}]^{1/c} \;, \\
+      t = F^{-1}(x) = t_0 -\tfrac{1}{b} \ln\absv{(x/a)^c - 1} \;.
+\end{gather*}
+Some transformations that follow from eq.~\eqref{eq:trivial}:
+\[  y = \ln\absv{(x/a)^c - 1} \;,\quad y = \ln\absv{x^c - a^c} \;,\quad y = \ln\frac{a^c - x^c}{c} \;. \]
+For eq.~\eqref{eq:linear}, the simplest transformation is $y = x^c$.
+
+As another example, in the Hosfeld IV equation,
+\begin{gather*}
+    x = F(t) = \frac{a t^c}{t^c + b} \;, \\
+    t = F^{-1}(x) = \left(\frac{b x}{a - x}\right)^{1/c} \;.
+\end{gather*}
+For eq.~\eqref{eq:trivial}, one could use
+\[  y = \left(\frac{x}{a - x}\right)^k = (a/x - 1)^{-k} \;,  \]
+and for eq.~\eqref{eq:linear},
+\[  y = \exp\left[\left(\frac{x}{a - x}\right)^k\right] = \exp[(a/x - 1)^{-k}] \;.  \]
+
+For a given SDE, it may be possible to linearize the deterministic part (aka the \emph{trend} or \emph{drift}). Or reduce to a constant the stochastic term (\emph{diffusion} or \emph{volatility}), through the Lamperti transform \citep[][sec.~3]{sdes}. In general, it is not possible to get the desired form for both, but often one of the terms is less important than the other. At any rate, there are good theoretical reasons for why linearity and Gaussianity go well together.
+
+It has been found that, allowing linear transformations of $x$ and $t$, nearly all the growth curve equations in the literature can be unified in a family of functions with two shape parameters:
+\begin{equation} \label{eq:uni}
+    U(x, \alpha, \beta) \equiv -[-x^{(\alpha)}]^{(\beta)} = t \;,
+\end{equation}
+in terms of the Box-Cox transformation defined in eq.~\eqref{eq:bc}. For instance, the Richards is the spacial case $\beta = 0$, and the Hosfeld IV corresponds to $\alpha = -1, \beta < 0$ (\citet{uni}, and \url{http://forestgrowth.unbc.ca/grex/}).
+
+In eq.~\eqref{eq:uni}, $x$ ranges between 0 and 1. If $x$ goes from 0 up to an asymptote $a$, we have $F^{-1}(x) = U(x/a, \alpha, \beta)$. It is also possible to have negative scale factors, which reverse the $x$ and $t$ axes, and then $F^{-1}(x) = U(1 - x/a, \alpha, \beta)$.
+
+\fig{grex}{Sigmoid growth equations determined by the unified transformation with parameters $a = \alpha$ and $b = \beta$. Items in parenthesis correspond to negative scale factors on $x$ and $t$ (reversed axes). Contours indicate the height of the inflection point relative to the range of $x$. From Garc\'ia (2005, 2008), see \url{http://forestgrowth.unbc.ca/grex/}  or \citet{uni} for references.}
+
+Figure \ref{fig:grex} shows the useful range of $\alpha$ and $\beta$, and the correspondence to common growth equation models. The unifying transformation $U(x, \alpha, \beta)$ has been implemented in the function \code{unitran()}, see \code{?unitran} for details. As an example, the following shows the inverse logistic:
+<<>>=
+curve(unitran(x, alpha=-1, beta=0))
+@
+\noindent
+The function can also be called with names: \code{curve(unitran(x, "logistic"))} produces the same result.
+
+The unified transformation can be useful when one searches for a suitable model form. With tree \#301 again, applying eq.~\eqref{eq:trivial}, let us try $y = U(x/a, \alpha, \beta)$. This is similar to what we did in Example 2 for the Richards model.
+<<>>=
+m <- sdemodel(phi=~unitran(x/a, alpha=alpha, beta=beta,
+  reverse="no"), phiprime=~unitran_prime(x/a, alpha=alpha,
+  beta=beta, reverse="no")/a, beta0=~b, beta1=0, mum=0)
+(f <- sdefit(m, x="height", t="age", data=lob301, start=c(a=70,
+  b=0.1, alpha=0.5, beta=0)))
+@
+\noindent
+As expected, \code{summary(f\$fit)} indicates over-parameterization. But the result might suggest trying the Levacovic, Korf or Schumacher models as more parsimonious named alternatives, e.g., by moving \code{beta} out of \code{start} and into \code{known=c(beta=-0.5)}.
+
+One could also try the reversed form with \code{1-x/a} --- \code{unitran()} does that automatically with the default \code{reverse="auto"}, but the discontinuity at $\beta = 0$ causes the optimization to fail. Or perhaps one could experiment with the form corresponding to eq.~\eqref{eq:linear}. There are limits to what is worth doing with 6 data points, but you get the idea.
+ 
+
+\begin{thebibliography}{99} \addcontentsline{toc}{section}{References}
+\bibitem[Chakraborty(2019)Chakraborty]{uni} Chakraborty, B., Bhowmick, A. R., Chattopadhyay, J., and Bhattacharya, S. (2019) A novel unification method to characterize a broad class of growth curve models using relative growth rate. \emph{Bulletin of Mathematical Biology 81}(7) 2529--2552. (\url{https://doi.org/10.1007/s11538-019-00617-w}).
+
+\bibitem[Garc\'ia(2013)Garc\'ia]{sys} Garc\'ia, O. (2013) 
+Forest stands as dynamical systems: An introduction. \emph{Modern Applied Science 7}(5), 32--38. (\url{https://doi.org/10.5539/mas.v7n5p32}).
+
+\bibitem[Garc\'ia(2019)Garc\'ia]{sdes} Garc\'ia, O. (2019) Estimating reducible stochastic differential equations by conversion to a least-squares problem. \emph{Computational Statistics}, 2019, 34, 23--46. (\url{https://doi.org/10.1007/s00180-018-0837-4}). 
+\end{thebibliography}
+
+%\bibliography{} \addcontentsline{toc}{section}{References}
+\end{document}

@@ -1,0 +1,24 @@
+Package: resde
+Title: Estimation in Reducible Stochastic Differential Equations
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Oscar",
+           family = "Garcia",
+           role = c("aut", "cre"),
+           email = "garcia@dasometrics.net",
+           comment = c(ORCID = "0000-0002-8995-1341"))
+Description: Maximum likelihood estimation in reducible stochastic differential
+  equation models. Discrete, possibly noisy observations, not necessarily evenly
+  spaced in time. Can fit multiple individuals/units with global and local
+  parameters, by fixed-effects or mixed-effects methods.
+  Ref.: Garcia (2019) <doi: 10.1007/s00180-018-0837-4>
+License: GPL (>= 2)
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = FALSE)
+RoxygenNote: 7.1.1
+Imports: stats, Deriv, nlme, methods
+Suggests: knitr
+VignetteBuilder: knitr
+URL: https://github.com/ogarciav/resde/
+BugReports: https://github.com/ogarciav/resde/issues
