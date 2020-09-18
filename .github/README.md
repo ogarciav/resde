@@ -33,7 +33,7 @@ sdefit(m, x="height", t="age", data=tree, start=c(a=70, b=0.1, c=0.5))
 
 ### Vignette
 
-[Fitting Reducible SDE Models](rsdes.pdf)
+[Fitting Reducible SDE Models](https://www.researchgate.net/publication/344293978)
 
 ### References
 
