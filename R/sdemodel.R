@@ -6,7 +6,7 @@
 #' @param phiprime  Optional formula for derivative of \code{phi}.
 #' @param beta0,beta1     Optional formulas or constants, possibly giving a re-parameterization,.
 #' @param t0,x0        Formulas or constants for the initial condition.
-#' @param mu0       Formula or constant for the initial condition \eq{\sigma_0}{\sigma0} multiplier.
+#' @param mu0       Formula or constant for the initial condition \eqn{\sigma_0}{\sigma0} multiplier.
 #' @param mup,mum       Formulas or constants for the process and measurement \eqn{\sigma} multipliers.
 #'
 #' @return  List with model specification, to be used by \code{\link{sdefit}()}.

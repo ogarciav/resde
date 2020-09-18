@@ -11,7 +11,6 @@ Description: Maximum likelihood estimation in reducible stochastic differential
   equation models. Discrete, possibly noisy observations, not necessarily evenly
   spaced in time. Can fit multiple individuals/units with global and local
   parameters, by fixed-effects or mixed-effects methods.
-  Ref.: Garcia (2019) <doi: 10.1007/s00180-018-0837-4>
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true

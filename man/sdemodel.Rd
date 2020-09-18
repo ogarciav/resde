@@ -16,7 +16,7 @@ sdemodel(phi=~x, phiprime=NULL, beta0=~beta0, beta1=~beta1,
 
 \item{t0, x0}{Formulas or constants for the initial condition.}
 
-\item{mu0}{Formula or constant for the initial condition \eq{\sigma_0}{\sigma0} multiplier.}
+\item{mu0}{Formula or constant for the initial condition \eqn{\sigma_0}{\sigma0} multiplier.}
 
 \item{mup, mum}{Formulas or constants for the process and measurement \eqn{\sigma} multipliers.}
 }
