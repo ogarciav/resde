@@ -58,7 +58,7 @@ sdefit <- function(model, x, t, unit=NULL, data=NULL, start=NULL,
     stop("Local parameters without unit ids", call.=FALSE)
   if(!is.null(unit) && length(local) == 0){
     warning("Unit ids but no local parameters", call.=FALSE)
-    unit <- NULL
+    local <- NULL
   }
   u <- known
   u$eta <- NULL
@@ -137,13 +137,15 @@ sdefit <- function(model, x, t, unit=NULL, data=NULL, start=NULL,
   # Replicate locals to one for each unit if necessary
   if(!is.null(unit)){
     nunits <- length(unique(data[, unit]))
-    for(i in seq_along(local)){
-      if(length(local[[i]]) == 1) local[[i]] <- rep(local[[i]], nunits)
-      else if(length(local[[i]]) != nunits)
-        stop("Length of local ", names(local)[i], " should be 1 or ", nunits,
-             call.=FALSE)
+    if(!is.null(local)){
+      for(i in seq_along(local)){
+        if(length(local[[i]]) == 1) local[[i]] <- rep(local[[i]], nunits)
+        else if(length(local[[i]]) != nunits)
+          stop("Length of local ", names(local)[i], " should be 1 or ", nunits,
+               call.=FALSE)
+      }
+      local <- as.data.frame(local)
     }
-    local <- as.data.frame(local)
   }
 
   # Fit with nlme
@@ -203,7 +205,7 @@ sdefit <- function(model, x, t, unit=NULL, data=NULL, start=NULL,
   } # done with nlme
 
   # Append [unit] to local names in formula
-  if(!is.null(unit)){
+  if(!is.null(unit) && !is.null(local)){
     nms <- names(local)
     u <- paste0("[", unit, "]")
     e <- lapply(paste0(nms, u), str2lang)
