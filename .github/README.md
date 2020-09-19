@@ -38,4 +38,4 @@ sdefit(m, x="height", t="age", data=tree, start=c(a=70, b=0.1, c=0.5))
 ### References
 
 García, O. (2019). "Estimating reducible stochastic differential equations by
-conversion to a least-squares problem". *Computational Statistics 34*: 23-46. [doi: 10.1007/s00180-018-0837-4](https://doi.org/10.1007/s00180-018-0837-4)
+conversion to a least-squares problem". *Computational Statistics 34*(1): 23-46. [doi: 10.1007/s00180-018-0837-4](https://doi.org/10.1007/s00180-018-0837-4)

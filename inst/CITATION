@@ -1,0 +1,17 @@
+citHeader("To cite resde in publications use:")
+
+citEntry(entry = "Article",
+  title        = "Estimating reducible stochastic differential equations by conversion to a least-squares problem",
+  author       = personList(as.person("Oscar Garcia")),
+  journal      = "Computational Statistics",
+  year         = "2019",
+  volume       = "34",
+  number       = "1",
+  pages        = "23--46",
+  url          = "https://doi.org/10.1007/s00180-018-0837-4",
+  textVersion  =
+  paste("Oscar Garcia (2019).",
+        "Estimating reducible stochastic differential equations by conversion to a least-squares problem.",
+        "Computational Statistics 34(1), 23-46.",
+        "URL https://doi.org/10.1007/s00180-018-0837-4 .")
+)
