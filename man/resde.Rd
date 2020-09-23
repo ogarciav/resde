@@ -3,6 +3,7 @@
 \docType{package}
 \name{resde}
 \alias{resde}
+\alias{resde-package}
 \title{\pkg{resde} - Parameter estimation in reducible SDE models.}
 \description{
 The main functions for model fitting are \code{\link{sdemodel}()}
@@ -31,3 +32,16 @@ sdefit(m, x="height", t="age", data=tree1, start=c(a=70, b=0.1, c=0.5))
 \references{
 Garcia, O. (2019) \url{https://doi.org/10.1007/s00180-018-0837-4}
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/ogarciav/resde/}
+  \item Report bugs at \url{https://github.com/ogarciav/resde/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Oscar Garcia \email{garcia@dasometrics.net} (\href{https://orcid.org/0000-0002-8995-1341}{ORCID})
+
+}
+\keyword{internal}

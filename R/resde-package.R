@@ -26,4 +26,5 @@
 #' sdefit(m, x="height", t="age", data=tree1, start=c(a=70, b=0.1, c=0.5))
 #' }
 #' @references Garcia, O. (2019) \url{https://doi.org/10.1007/s00180-018-0837-4}
-NULL
+#' @keywords internal
+"_PACKAGE"
