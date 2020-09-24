@@ -26,7 +26,7 @@ unitran_prime(x, name=NULL, par=NULL, alpha=NULL, beta=NULL, reverse="auto")
 
 \item{reverse}{Reverse \code{x} and \code{t} axes? One of \code{"yes"}, \code{"no"}, \code{"auto"}.
 With \code{"auto"}, axes are reversed as necessary for an upper asymptote.
-(i.e., if \code{beta} > 0).}
+(i.e., if \code{alpha <= 0} and \code{beta > 0}).}
 }
 \value{
 \code{unitran()}: Transformed \code{x}, \eqn{y = \varphi(x)}.

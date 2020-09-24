@@ -8,7 +8,7 @@ parameters, by fixed-effects or mixed-effects methods.
 
 This is a beta version, with limited testing so far. Use with care.
 
-![unitran](grex.png)
+![unitran](vignettes/grex.png)
 
 ### Installation
 
