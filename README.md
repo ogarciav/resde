@@ -10,6 +10,8 @@ This is a beta version, with limited testing so far. Use with care.
 
 ![unitran](grex.png)
 
+The picture indicates growth curves that can be modelled with reducible SDEs, see [here](https://ogarciav.github.io/grex/).
+
 ### Installation
 
 One way is to use
