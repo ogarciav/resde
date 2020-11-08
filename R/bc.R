@@ -13,14 +13,20 @@
 #' @return \code{bc()}: Returns the transform value(s).
 #' @export
 #'
+#' @details Using \code{expm1()} is more accurate than a more "obvious"
+#'    alternative like \preformatted{
+#'      if (abs(lambda) < 6e-9) log(y)
+#'      else (y^lambda - 1) / lambda} The difference might be important in
+#'    optimization applications.
+#'    
 #' @examples
 #' bc(0.5, 1.5)
 #' bc(1, 0)
 #' 
 bc <- function(y, lambda){
   stopifnot(length(lambda) == 1)
-  if (abs(lambda) < 6e-9) log(y)
-  else (y^lambda - 1) / lambda
+  if (abs(lambda) < 1e-300) log(y)
+  else (expm1(lambda * log(y))) / lambda
 }
 
 
@@ -35,8 +41,8 @@ bc <- function(y, lambda){
 #' 
 bc_inv <- function(y, lambda){
   stopifnot(length(lambda) == 1)
-  if (abs(lambda) < 6e-9) exp(y)
-  else (1 + lambda*y)^(1/lambda)
+  if (abs(lambda) < 1e-300) exp(y)
+  else exp(log1p(lambda * y) / lambda)
 }
 
 

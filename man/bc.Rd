@@ -28,6 +28,13 @@ bc_prime(y, lambda)
 \description{
 These functions calculate the Box-Cox transformation, its inverse, and derivative.
 }
+\details{
+Using \code{expm1()} is more accurate than a more "obvious"
+   alternative like \preformatted{
+     if (abs(lambda) < 6e-9) log(y)
+     else (y^lambda - 1) / lambda} The difference might be important in
+   optimization applications.
+}
 \section{Functions}{
 \itemize{
 \item \code{bc}: The Box-Cox transformation
