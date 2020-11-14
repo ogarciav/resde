@@ -14,17 +14,17 @@
 #' Some auxilliary functions include the Box-Cox transformation \code{\link{bc}()},
 #' and the \emph{unified transformation} \code{\link{unitran}()}.
 #' 
-#' For detailed instructions see the vignette: \url{https://doi.org/10.13140/RG.2.2.20616.44805}
+#' For detailed usage see the vignette.
 #' 
 #' @docType package
 #' @name resde
 #' @examples
-#' \dontrun{
 #' # Richards model  dH^c = b(a^c - H^c) dt + s dW for tree heights
 #' tree1 <- subset(Loblolly, Seed == Seed[1]) # first tree
 #' m <- sdemodel(~x^c, beta0=~b*a^c, beta1=~-b, mum=0) # no measurement error
 #' sdefit(m, x="height", t="age", data=tree1, start=c(a=70, b=0.1, c=0.5))
-#' }
-#' @references Garcia, O. (2019) \url{https://doi.org/10.1007/s00180-018-0837-4}
-#' @keywords internal
-"_PACKAGE"
+#' 
+#' @references Garcia, O. (2019) "Estimating reducible stochastic differential
+#'  equations by conversion to a least-squares problem". \emph{Computational
+#'  Statistics 34}(1), 23-46. \url{https://doi.org/10.1007/s00180-018-0837-4}
+NULL

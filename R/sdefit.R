@@ -9,7 +9,7 @@
 #' @param x,t     Vectors with variables, or names of columns in data frame.
 #' @param unit    If applicable, unit id vector, or name of its column in data frame.
 #' @param data    Data frame, if data not given directly in \code{x}, \code{t}, \code{unit}.
-#' @param start   Named vector or named list with starting parameter values.
+#' @param start   Named vector or named list with starting parameter values
 #'                for non-hierarchical models. They can also be given
 #'                in global.
 #' @param global  Named vector or list of global parameters and their starting

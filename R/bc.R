@@ -7,26 +7,29 @@
 #' 
 #' @describeIn bc  The Box-Cox transformation
 #' 
-#' @param y Numeric vector (must be >= 0).
+#' @param x,y Numeric vector (\code{x} must be >= 0).
 #' @param lambda Numeric scalar, power parameter.
 #'
 #' @return \code{bc()}: Returns the transform value(s).
 #' @export
 #'
-#' @details Using \code{expm1()} is more accurate than a more "obvious"
-#'    alternative like \preformatted{
-#'      if (abs(lambda) < 6e-9) log(y)
-#'      else (y^lambda - 1) / lambda} The difference might be important in
-#'    optimization applications.
+#' @details \code{bc()} uses \code{expm1()}, wich is more accurate
+#'  for small \code{lambda} than a more "obvious" alternative like
+#'  \preformatted{  if (abs(lambda) < 6e-9) log(y)
+#'  else (y^lambda - 1) / lambda} The difference might be important
+#'  in optimization applications. See example below. Similarly,
+#'  \code{bc_inv()} uses \code{log1p()}.
 #'    
 #' @examples
 #' bc(0.5, 1.5)
 #' bc(1, 0)
+#' obvious <- function(lambda){(0.6^lambda - 1) / lambda} # at y = 0.6
+#' plot(obvious, xlab="lambda", xlim=c(1e-6, 1e-9), log="x")
 #' 
-bc <- function(y, lambda){
+bc <- function(x, lambda){
   stopifnot(length(lambda) == 1)
-  if (abs(lambda) < 1e-300) log(y)
-  else (expm1(lambda * log(y))) / lambda
+  if (abs(lambda) < 1e-300) log(x)
+  else (expm1(lambda * log(x))) / lambda
 }
 
 

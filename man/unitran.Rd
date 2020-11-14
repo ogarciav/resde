@@ -29,7 +29,7 @@ With \code{"auto"}, axes are reversed as necessary for an upper asymptote.
 (i.e., if \code{alpha <= 0} and \code{beta > 0}).}
 }
 \value{
-\code{unitran()}: Transformed \code{x}, \eqn{y = \varphi(x)}.
+\code{unitran()}: Transformed \code{x}, i.e., \eqn{y = \varphi(x)}.
 
 \code{unitran_inv()}: Inverse of \code{unitran()},  \eqn{x = \varphi^{-1}(y)}{x = \varphi^-1(y)}.
 
@@ -38,7 +38,7 @@ With \code{"auto"}, axes are reversed as necessary for an upper asymptote.
 \description{
 Calculates a variable transformation that produces various growth curve models, depending on the
 values of two shape parameters, \code{alpha} and \code{beta}. Models can also
-be specified by name.
+be specified by name. Uses \code{\link{bc}(), bc_inv(), bc_prime()}.
 }
 \section{Functions}{
 \itemize{

@@ -89,7 +89,7 @@
 
 \title{Fitting Reducible SDE Models}
 \author{Vignette for \pkg{resde}}  % Oscar Garc\'ia
-\date{Draft, \today}
+\date{} % Draft, \today}
 
 \begin{document}
 \maketitle
@@ -109,9 +109,9 @@ options(width=67)
 \section{Introduction}
 \label{sec:intro}
 
-Package \pkg{resde} computes maximum-likelihood (ML) parameter estimates for reducible stochastic differential equation (RSDE, more on those in a minute). Observations are at discrete points in time, not necesarily evenly spaced, and may include measurement error. Currently, \pkg{resde} handles only univariate time-independent RSDEs. Some types of multivariate models might be added in the future. In the simplest case, there is a single individual or sampling unit (\emph{unit}, for short). Alternatively, there may be a set of units, with some parameters common to all units (\emph{global}), and others specific to each unit (\emph{local}). Estimation in these \emph{two-level hierarchical models} can use either fixed effects methods, or more fashionable mixed effects methods.
+Package \pkg{resde} computes maximum-likelihood (ML) parameter estimates for reducible stochastic differential equations (RSDE, more on those in a minute). Observations are at discrete points in time, not necesarily evenly spaced, and may include measurement error. Currently, \pkg{resde} handles only univariate time-independent RSDEs. In the simplest case, there is a single individual or sampling unit (\emph{unit}, for short). Alternatively, there may be a set of units, with some parameters common to all units (\emph{global}), and others specific to each unit (\emph{local}). Estimation in these \emph{two-level hierarchical models} can use either a fixed effects approach, or more fashionable mixed effects methods.
 
-RSDEs are SDEs that can be reduced to linear by a change of variables. This may seem unduly restrictive, but we shall see that many important problems can be formulated this way. In particular, linearizing transformations exist for most of the univariate growth models encountered in the literature. Esentially, any differential equation with an invertible closed-form solution can be linearized (section \ref{sec:more}).
+RSDEs are SDEs that can be reduced to linear by a change of variables. This may seem unduly restrictive, but we shall see that many important problems can be formulated this way. In particular, linearizing transformations exist for most of the univariate growth models encountered in the literature. In fact, any differential equation with an invertible closed-form solution can be linearized (section \ref{sec:curves}).
 
 In \citet{sdes}, I showed an \lang{R} function, \code{uvector()}, that generates a certain sum of squares that minimized produces ML estimates (\emph{not} least-squares estimates). That worked, but the necessary incantations could become rather complex and less than intuitive. Package \pkg{resde} offers a more user-friendly front-end. There are two main functions: \code{sdemodel()} specifies the model form and initial conditions --- for a unit in case of hierarchical models. That includes the variable transformation, any re-parameterizations, and the existence or not of process, measurement, and initial condition noise. Then, \code{sdefit()} uses \code{uvector()} internally to perform the estimation, given the model defined by \code{sdemodel()}, the data, and starting parameter guesses. For hierarchical models, one must also identify the parameters as globals or locals, and indicate if fixed or mixed effects are to be used.
 
@@ -145,10 +145,10 @@ The $\epsilon_i$ are mutually independent, and independent of the Wiener (aka Br
 There may be a re-parameterization, where any of the ``base'' parameters $\beta_0$, $\beta_1$, $t_0$, $y_0$, $\mu_p$, $\mu_0$, $\mu_m$ can be replaced by functions of new parameters. For instance, an SDE
 \[  \dd X^c = b(a^c - X^c) \dd t + \sqrt{b} \dd W \;,\]
 with initial condition fixed at the origin,
-can be specified by the transformation $Y = \varphi(X, c) = X^c$, and the parameter substitutions $\beta_0 \rightarrow b a^c, \beta_1 \rightarrow -b, \mu_p \rightarrow \sqrt{b},
-t_0, x_0, \mu_0 \rightarrow 0$. If there are no measurement errors, one would set $\mu_m \rightarrow 0$, otherwise $\mu_m \rightarrow 1$.
+can be specified by the transformation $Y = \varphi(X, c) = X^c$ and the parameter substitutions $\beta_0 \rightarrow b a^c, \beta_1 \rightarrow -b, \mu_p \rightarrow \sqrt{b}$, and
+$t_0, x_0, \mu_0 \rightarrow 0$. If there are no measurement errors one would set $\mu_m \rightarrow 0$, otherwise $\mu_m \rightarrow 1$.
 
-In \pkg{resde}, the model specification is done with function \code{sdemodel()}. The arguments and defaults are:
+In \pkg{resde}, the model specification is done with function \code{sdemodel()}. The arguments and defaults are
 <<sdemodel, eval=FALSE>>=
 sdemodel(phi=~x, phiprime=NULL, beta0=~beta0, beta1=~beta1, t0=0,
          x0=0, mu0=0, mup=1, mum=1)
@@ -162,7 +162,7 @@ library(resde)
 exmpl <- sdemodel(phi=~x^c, beta0=~b*a^c, beta1=~-b, mup=~sqrt(b))
 @
 \noindent
-Always check the displayed result to see if that is what you meant. The display can be obtained again with \verb|sdemodel_display(exmpl)|. More examples below.
+The leading \verb|##| are not displayed by \lang{R}, but are used here to distinguish outputs from inputs. Always check the displayed result to see if that is what you meant. The display can be obtained again with \verb|sdemodel_display(exmpl)|. More examples below.
 
 
 \section{Single-unit estimation}
@@ -199,7 +199,7 @@ and measurement error
 \begin{equation*}
     h_i^c = H^c(t_i) + \epsilon_i \;,
 \end{equation*}
-where the $\epsilon_i$ are normally distributed with mean 0 and variance $\sigma_m^2$.
+where the $\epsilon_i$ are independent normally distributed with mean 0 and variance $\sigma_m^2$.
 
 In \pkg{resde}, the model specification is
 <<>>=
@@ -275,7 +275,7 @@ curve(72.5459 * (1 - exp(-0.0967 * x))^(1/0.5024), add=T,
 @
 \noindent
 
-As with any optimization, one should be careful and try different starting values, because local optima can occur. For instance, in the last run, changing the start to \code{a=60} produces a different solution.
+As with any optimization, one should be careful and try different starting values, because local optima can occur. For instance, in the last run, changing the start to \code{a=60} produces a different (worse) solution.
 
 
 \section{Hierarchical (two-level) models}
@@ -320,7 +320,7 @@ m <- sdemodel(phi=~bc(x/a, c), beta0=0, beta1=~-b,
 Again, the generated derivative is a little more complex than necessary. One could have included \verb|phiprime = (x/a)^(c-1)/a|, or \verb|phiprime = bc_prime(x/a, c)/a|.
 \end{sloppypar}
 
-For hierarchical models, one must indicate a variable that identifies the units in parameter \code{unit} of \code{sdefit()}, \code{"Seed"} in this case. Also, \code{global} and \code{local} are used instead of \code{start}. Starting values for locals can be vectors with one value for each unit, or a single value that applies to all.
+For hierarchical models, one must indicate a variable that identifies the units in the parameter \code{unit} of \code{sdefit()}, \code{"Seed"} in this case. Also, \code{global} and \code{local} are used instead of \code{start}. Starting values for locals can be vectors with one value for each unit, or a single value that applies to all.
 
 First, take $a$ as local, that is, the asymptotes $a_j$ vary from tree to tree:
 <<>>=
@@ -346,19 +346,19 @@ Finally, with both $a$ and $b$ locals,
             data=Loblolly, global=c(c=0.5), local=c(a=70, b=0.1)))
 @
 \noindent
-Here the AIC or BIC have to be used for the comparison, because the number of free parameters is different. For AIC and BIC smaller is better. They indicate that this is worse than the single-local versions.
+Here the AIC or BIC have to be used for the comparison, because the number of free parameters is different. For AIC and BIC smaller is better. They indicate that this is worse than the one-local versions.
 
 Other structures could be defined by re-parameterization, substituting
 functions of other global and local parameters for a, b or c.
 
-By the way, if you are mystified by the strangely-looking Box-Cox transformation, eq.~\eqref{eq:bc}, don't be. It is basically a power transformation with a twist, considering that linear (or more precisely affine) transformations are often ``uninteresting''. The point is that the limit $\lim_{c \rightarrow 0} (x^c - 1)/c = \ln x$ makes the transformation continuous at $c=0$, as a function of $c$. In the process including the logarithm as a special case. Hiding those details inside the definition, using $x^{(c)}$ saves us the hassle of having to talk about the special case all the time. And the logarithmic transformation comes along for free. We'll come back to this, with a vengeance, in Section \ref{sec:more}. Physicists discovered the transformation independently, looking from the other end, calling it a \emph{generalized logarithm} denoted by $\ln_c(x)$.
+By the way, if you are mystified by the strangely-looking Box-Cox transformation, eq.~\eqref{eq:bc}, don't be. It is basically a power transformation with a twist, considering that linear (or more precisely affine) transformations are often ``uninteresting''. The point of it is that the limit $\lim_{c \rightarrow 0} (x^c - 1)/c = \ln x$ makes the transformation continuous at $c=0$, as a function of $c$. In the process including the logarithm as a special case. Hiding those details inside the definition, using $x^{(c)}$ saves us the hassle of having to talk about the special case all the time. And the logarithmic transformation comes along for free. We'll come back to this, with a vengeance, in Section \ref{sec:uni}. Physicists discovered the transformation independently, looking from the other end, calling it a \emph{generalized logarithm}, denoted by $\ln_c(x)$.
 
 
 \subsection{Example 4, random local parameters}
 
 Section 3.3.2 and Appendix F of \citet{sdes}.
 
-The mixed effects method uses \code{nlme()} instead of \code{nls()}. This is chosen by setting \code{method = "nlme"} in \code{sdefit()} (the default is \code{"nls"}).
+The mixed effects method uses \code{nlme()} instead of \code{nls()}. This is chosen by setting \code{method = "nlme"} in \code{sdefit()}. The default is \code{method = "nls"}.
 
 Let us fit the $b$-local version from Example 3:
 <<r, error=TRUE, purl=FALSE>>=
@@ -393,7 +393,7 @@ coef(blocal_mx$fit)
 
 \subsection{Under the hood}
 
-The aim of \pkg{resde} is to facilitate the application of the function \code{uvector()} from \citet{sdes}. That function uses tricks based on work by Furnival and by Box and Cox, to compute values such that minimizing the sum of their squares produces maximum-likelihood parameter estimates. The sum of squares is minimized with \code{nls()} from package \pkg{stats}, or with \code{nlme()} from package \pkg{nlme}. Setting up a call of \code{uvector()}, as done in \citet{sdes}, can be rather complicated, a process that is ``mechanized'' by \code{sdemodel()} and \code{sdefit()}. The generated call of \code{uvector()} can be seen with \code{formula(f\$fit)} and \code{(f\$fit)\$call}, where \code{f} is the output from \code{sdefit()}. Conceivably, there may be applications where it could be necessary to use \code{uvector()} directly.
+The aim of \pkg{resde} is to facilitate the application of the function \code{uvector()} from \citet{sdes}. That function uses tricks based on work by Furnival and by Box and Cox to compute values such that minimizing the sum of their squares produces maximum-likelihood parameter estimates. The sum of squares is minimized with \code{nls()} from package \pkg{stats}, or with \code{nlme()} from package \pkg{nlme}. Setting up a call to \code{uvector()}, as done in \citet{sdes}, can be rather complicated, a process that is ``mechanized'' by \code{sdemodel()} and \code{sdefit()}. The generated call to \code{uvector()} can be seen with \code{formula(f\$fit)} or \code{(f\$fit)\$call}, where \code{f} is the output from \code{sdefit()}. Conceivably, there may be applications where it could be necessary to use \code{uvector()} directly.
 
 When there is both process and measurement noise, \pkg{resde} uses internally an additional parameter, \code{eta}, that corresponds to the relative measurement error $\eta = \sigma_m^2 / (\sigma_p^2 + \sigma_m^2)$. It must take values between 0 ($\sigma_m = 0$), and 1 ($\sigma_p = 0$). With \code{nls()}, algorithm \code{port} performs the constrained optimization. For mixed effects, \code{nlme()} does not allow constraints. Therefore, \code{optimize()} is used in that case to perform a one-dimensional optimization over \code{eta}, calling \code{nlme()} at each step.
 
@@ -424,7 +424,7 @@ for(i in seq_along(eta)){
 plot(lgLik ~ eta)
 @
 \noindent
-We see that there are local optima at $\eta = 0$ ($\sigma_m = 0$), and at $\eta = 1$ ($\sigma_p = 0$). This is what was causing trouble with the optimizations. However, the significance of the log-likelihood differences is marginal. One may conclude that the data cannot tell us much about the error structure, so that we are justified in choosing it from prior knowledge. E.g., if the height observations were derived from tree ring observations, the measurement errors may be negligible compared to the environmental noise, and $\sigma_m = 0$ would be reasonable.
+We see that there are local optima at $\eta = 0$ ($\sigma_m = 0$), and at $\eta = 1$ ($\sigma_p = 0$). This is what was causing trouble with the optimizations. However, the significance of the log-likelihood differences is marginal. One may conclude that the data cannot tell us much about the error structure, so that we are justified in choosing it from prior knowledge. E.g., if the height observations were derived from the tree rings, the measurement errors may be negligible compared to the environmental noise, and $\sigma_m = 0$ would be reasonable.
 
 
 \subsection{On transformations}
@@ -486,13 +486,13 @@ These are often preferred to equations that include both $x$ and $t$ on the righ
 \[
     \int\frac{\dd x}{f(x)} = t \;.
 \]
-Defining the integral as $F^{-1}(x)$ we are back to the situation above. Of course, luck is needed for the integral to have a closed form (analytical solution). On the other hand, it might be interesting to see how well the estimation method works if \code{phi()} and \code{phiprime()} are calculated by numerical integration.
+Defining this integral as $F^{-1}(x)$ we are back to the situation above. Of course, luck is needed for the integral to have a closed form (analytical solution). On the other hand, it might be interesting to see how well the estimation method works if \code{phi()} and \code{phiprime()} are calculated by numerical integration.
 
 Note: These identities are sometimes useful:
 \[  F'(t) = 1 / (F^{-1})'[F(t)] \;, \quad (F^{-1})'(x) = 1 / F'[F^{-1}(x)] \;. \]
 Proof: Differentiate $F^{-1}[F(t)] = t$ or $F[F^{-1}(x)] = x$.
 
-For SDEs, it may be possible to linearize the deterministic part (aka the \emph{trend} or \emph{drift}). Or reduce to a constant the stochastic term (\emph{diffusion} or \emph{volatility}), through the Lamperti transform \citep[][sec.~3]{sdes}. In general, it is not possible to get the desired form for both, but often one of the terms is less important than the other. At any rate, there are good theoretical reasons for why linearity and Gaussianity go well together.
+For SDEs, it may be possible to linearize the deterministic part (aka the \emph{trend} or \emph{drift}). Or reduce to a constant the stochastic term (\emph{diffusion} or \emph{volatility}), through the Lamperti transform \citep[][sec.~3]{sdes}. In general, it is not possible to get the desired form for both, but often one of the terms is less important than the other. At any rate, there are good theoretical reasons for why linearity and Gaussianity should go well together.
 
 
 \subsubsection{A unifying transformation}
@@ -506,7 +506,7 @@ in terms of the Box-Cox transformation defined in eq.~\eqref{eq:bc}. For instanc
 
 In eq.~\eqref{eq:uni}, $x$ ranges between 0 and 1. If $x$ goes from 0 up to an asymptote $a$, we have $F^{-1}(x) = U(x/a, \alpha, \beta)$. It is also possible to have negative scale factors, which reverse the $x$ and $t$ axes, and then $F^{-1}(x) = U(1 - x/a, \alpha, \beta)$.
 
-\fig{grex}{Sigmoid growth equations determined by the unified transformation with parameters $a = \alpha$ and $b = \beta$. Items in parenthesis correspond to negative scale factors on $x$ and $t$ (reversed axes). Contours indicate the height of the inflection point relative to the range of $x$. From Garc\'ia (2005, 2008), see \url{http://forestgrowth.unbc.ca/grex/}  or \citet{uni} for references.}
+\fig{grex}{Sigmoid growth equations determined by the unified transformation with parameters $a = \alpha$ and $b = \beta$. Items in parenthesis correspond to negative scale factors on $x$ and $t$ (reversed axes). Contours indicate the height of the inflection point relative to the range of $x$. From Garc\'ia (2005, 2008), see \url{http://forestgrowth.unbc.ca/grex/}  or \citet{uni} for model references.}
 
 Figure \ref{fig:grex} shows the useful range of $\alpha$ and $\beta$, and the correspondence to common growth equation models. The unifying transformation $U(x, \alpha, \beta)$ has been implemented in the function \code{unitran()}, see \code{?unitran} for details. As an example, the following shows the inverse logistic:
 <<>>=
@@ -540,6 +540,8 @@ Forest stands as dynamical systems: An introduction. \emph{Modern Applied Scienc
 
 \bibitem[Garc\'ia(2019)Garc\'ia]{sdes} Garc\'ia, O. (2019) Estimating reducible stochastic differential equations by conversion to a least-squares problem. \emph{Computational Statistics}, 2019, 34, 23--46. (\url{https://doi.org/10.1007/s00180-018-0837-4}). 
 \end{thebibliography}
+
+\bigskip\today
 
 %\bibliography{} \addcontentsline{toc}{section}{References}
 \end{document}

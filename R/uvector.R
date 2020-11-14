@@ -29,7 +29,8 @@
 #'
 #' The three functions are essentially unchanged from García (2019)
 #' <\url{https://doi.org/10.1007/s00180-018-0837-4}>,
-#' except for adding in \code{logdet_and_v()} a shortcut for when \eqn{L} is
+#' except for a somewhat safer computation for very small \code{beta1},
+#' and adding in \code{logdet_and_v()} a shortcut for when \eqn{L} is
 #' diagonal (e.g., when \eqn{\sigma_m = 0}). 
 #'
 #' @param x,t Data vectors
@@ -92,13 +93,14 @@ uvector <- function(x, t, unit = NULL, beta0, beta1, eta, eta0, x0, t0, lambda,
     muetam <- theta.j$mum ^ 2 * theta.j$eta
     mueta0 <- theta.j$mu0 ^ 2 * theta.j$eta0
     muetap <- theta.j$mup ^ 2 * (1 - theta.j$eta)
-    if (theta.j$beta1 != 0) {
+    if (abs(theta.j$beta1) > 1e-300) { # was == 0 in the original
       ex <- exp(theta.j$beta1 * Dt)
       ex2 <- ex ^ 2
       z <- y + theta.j$beta0 / theta.j$beta1 - ex *
         (c(y0, y[-n.j]) + theta.j$beta0 / theta.j$beta1)
-      cdiag <- (ex2 + 1) * muetam + muetap * (ex2 - 1) /
-        (2 * theta.j$beta1)
+      cdiag <- (ex2 + 1) * muetam + muetap *
+        expm1(2 * theta.j$beta1 * Dt) / (2 * theta.j$beta1)
+        # changed to expm1() from (ex2 - 1) in the published version
       cdiag[1] <- cdiag[1] - ex2[1] * (muetam - mueta0)
       csub <- -ex * muetam
     } else { # beta1 == 0
@@ -182,7 +184,7 @@ logdet.and.v <- function(cdiag, csub=NULL, z)
 {
   if(is.null(csub) || all(cdiag == 0)){ # diagonal
     return(list(logdet = sum(log(cdiag))/2, v = z / sqrt(cdiag)))
-  }
+  } # not in the published version
   v <- z
   ldiag <- sqrt(cdiag[1])
   logdet <- log(ldiag)

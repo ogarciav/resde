@@ -66,7 +66,8 @@ with \eqn{L} lower-triangular.
 
 The three functions are essentially unchanged from García (2019)
 <\url{https://doi.org/10.1007/s00180-018-0837-4}>,
-except for adding in \code{logdet_and_v()} a shortcut for when \eqn{L} is
+except for a somewhat safer computation for very small \code{beta1},
+and adding in \code{logdet_and_v()} a shortcut for when \eqn{L} is
 diagonal (e.g., when \eqn{\sigma_m = 0}).
 }
 \section{Functions}{

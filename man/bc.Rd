@@ -6,14 +6,14 @@
 \alias{bc_prime}
 \title{Box-Cox transformation}
 \usage{
-bc(y, lambda)
+bc(x, lambda)
 
 bc_inv(y, lambda)
 
 bc_prime(y, lambda)
 }
 \arguments{
-\item{y}{Numeric vector (must be >= 0).}
+\item{x, y}{Numeric vector (\code{x} must be >= 0).}
 
 \item{lambda}{Numeric scalar, power parameter.}
 }
@@ -29,11 +29,12 @@ bc_prime(y, lambda)
 These functions calculate the Box-Cox transformation, its inverse, and derivative.
 }
 \details{
-Using \code{expm1()} is more accurate than a more "obvious"
-   alternative like \preformatted{
-     if (abs(lambda) < 6e-9) log(y)
-     else (y^lambda - 1) / lambda} The difference might be important in
-   optimization applications.
+\code{bc()} uses \code{expm1()}, wich is more accurate
+ for small \code{lambda} than a more "obvious" alternative like
+ \preformatted{  if (abs(lambda) < 6e-9) log(y)
+ else (y^lambda - 1) / lambda} The difference might be important
+ in optimization applications. See example below. Similarly,
+ \code{bc_inv()} uses \code{log1p()}.
 }
 \section{Functions}{
 \itemize{
@@ -47,6 +48,8 @@ Using \code{expm1()} is more accurate than a more "obvious"
 \examples{
 bc(0.5, 1.5)
 bc(1, 0)
+obvious <- function(lambda){(0.6^lambda - 1) / lambda} # at y = 0.6
+plot(obvious, xlab="lambda", xlim=c(1e-6, 1e-9), log="x")
 
 bc_inv(-0.4, 1.5)
 bc_inv(0, 0)

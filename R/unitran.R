@@ -5,7 +5,7 @@
 #'
 #' Calculates a variable transformation that produces various growth curve models, depending on the
 #' values of two shape parameters, \code{alpha} and \code{beta}. Models can also
-#' be specified by name.
+#' be specified by name. Uses \code{\link{bc}(), bc_inv(), bc_prime()}.
 #'
 #' @param x,y Variable to be transformed, \code{x} must be between 0 and 1.
 #' @param name Optional model name, case-insensitive, in quotes. One of \code{Richards},
@@ -18,7 +18,7 @@
 #'   With \code{"auto"}, axes are reversed as necessary for an upper asymptote.
 #'   (i.e., if \code{alpha <= 0} and \code{beta > 0}).
 #'
-#' @return \code{unitran()}: Transformed \code{x}, \eqn{y = \varphi(x)}.
+#' @return \code{unitran()}: Transformed \code{x}, i.e., \eqn{y = \varphi(x)}.
 #' @export
 #' @describeIn unitran Unified transformation.
 #'

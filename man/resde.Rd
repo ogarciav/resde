@@ -3,7 +3,6 @@
 \docType{package}
 \name{resde}
 \alias{resde}
-\alias{resde-package}
 \title{\pkg{resde} - Parameter estimation in reducible SDE models.}
 \description{
 The main functions for model fitting are \code{\link{sdemodel}()}
@@ -19,29 +18,17 @@ locals or a mixed effects method should be used.
 Some auxilliary functions include the Box-Cox transformation \code{\link{bc}()},
 and the \emph{unified transformation} \code{\link{unitran}()}.
 
-For detailed instructions see the vignette: \url{https://doi.org/10.13140/RG.2.2.20616.44805}
+For detailed usage see the vignette.
 }
 \examples{
-\dontrun{
 # Richards model  dH^c = b(a^c - H^c) dt + s dW for tree heights
 tree1 <- subset(Loblolly, Seed == Seed[1]) # first tree
 m <- sdemodel(~x^c, beta0=~b*a^c, beta1=~-b, mum=0) # no measurement error
 sdefit(m, x="height", t="age", data=tree1, start=c(a=70, b=0.1, c=0.5))
-}
+
 }
 \references{
-Garcia, O. (2019) \url{https://doi.org/10.1007/s00180-018-0837-4}
+Garcia, O. (2019) "Estimating reducible stochastic differential
+ equations by conversion to a least-squares problem". \emph{Computational
+ Statistics 34}(1), 23-46. \url{https://doi.org/10.1007/s00180-018-0837-4}
 }
-\seealso{
-Useful links:
-\itemize{
-  \item \url{https://github.com/ogarciav/resde/}
-  \item Report bugs at \url{https://github.com/ogarciav/resde/issues}
-}
-
-}
-\author{
-\strong{Maintainer}: Oscar Garcia \email{garcia@dasometrics.net} (\href{https://orcid.org/0000-0002-8995-1341}{ORCID})
-
-}
-\keyword{internal}

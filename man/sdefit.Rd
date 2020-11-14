@@ -17,7 +17,7 @@ sdefit(model, x, t, unit=NULL, data=NULL, start=NULL,
 
 \item{data}{Data frame, if data not given directly in \code{x}, \code{t}, \code{unit}.}
 
-\item{start}{Named vector or named list with starting parameter values.
+\item{start}{Named vector or named list with starting parameter values
 for non-hierarchical models. They can also be given
 in global.}
 
