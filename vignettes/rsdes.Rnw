@@ -109,7 +109,7 @@ options(width=67)
 \section{Introduction}
 \label{sec:intro}
 
-Package \pkg{resde} computes maximum-likelihood (ML) parameter estimates for reducible stochastic differential equations (RSDE, more on those in a minute). Observations are at discrete points in time, not necesarily evenly spaced, and may include measurement error. Currently, \pkg{resde} handles only univariate time-independent RSDEs. In the simplest case, there is a single individual or sampling unit (\emph{unit}, for short). Alternatively, there may be a set of units, with some parameters common to all units (\emph{global}), and others specific to each unit (\emph{local}). Estimation in these \emph{two-level hierarchical models} can use either a fixed effects approach, or more fashionable mixed effects methods.
+Package \pkg{resde} computes maximum-likelihood (ML) parameter estimates for reducible stochastic differential equations (RSDE, more on those in a minute). Observations are at discrete points in time, not necessarily evenly spaced, and may include measurement error. Currently, \pkg{resde} handles only univariate time-independent RSDEs. In the simplest case, there is a single individual or sampling unit (\emph{unit}, for short). Alternatively, there may be a set of units, with some parameters common to all units (\emph{global}), and others specific to each unit (\emph{local}). Estimation in these \emph{two-level hierarchical models} can use either a fixed effects approach, or more fashionable mixed effects methods.
 
 RSDEs are SDEs that can be reduced to linear by a change of variables. This may seem unduly restrictive, but we shall see that many important problems can be formulated this way. In particular, linearizing transformations exist for most of the univariate growth models encountered in the literature. In fact, any differential equation with an invertible closed-form solution can be linearized (section \ref{sec:curves}).
 
@@ -131,7 +131,7 @@ possibly containing unknown parameters, such that $Y$ for a unit follows a linea
 \begin{equation} \label{eq:sde}
     \dd Y = (\beta_0 + \beta_1 Y) \dd t + \mu_p \sigma_p \dd W \;,
 \end{equation}
-with a posibly random initial condition
+with a possibly random initial condition
 \begin{equation} \label{eq:ic}
     Y(t_0) = \varphi(x_0) + \mu_0 \epsilon_0 \;, \quad \epsilon_0 \sim N(0, \sigma_0^2) \;.
 \end{equation}
@@ -185,7 +185,7 @@ This example is from section 3.2.1 and Appendix C.1 of \citet{sdes}.
 lob301 <- Loblolly[Loblolly$Seed == 301, ]
 @
 
-A suitable mdel is
+A suitable model is
 \begin{equation*}
     \der{H^c}{t} = b(a^c - H^c) \;,
 \end{equation*}
@@ -207,7 +207,7 @@ m <- sdemodel(phi=~x^c, beta0=~b*a^c, beta1=~-b)  # else, defaults
 @
 \noindent
 
-Now, the parameter estmation:
+Now, the parameter estimation:
 <<>>=
 f <- sdefit(m, x="height", t="age", data=lob301,
             start=c(a=60, b=0.1, c=1))
@@ -263,7 +263,7 @@ sdefit(m, x="height", t="age", data=lob301,
        start=c(a=70, b=0.1, c=1))
 @
 \noindent
-The derivative produced by \code{Deriv::Deriv()} is a little messy, but it works. On esthetic grounds, one might include in \code{sdemodel{}} the simpler equivalent \verb|phiprime = c*x^(c-1)/(x^c - a^c)|.
+The derivative produced by \code{Deriv::Deriv()} is a little messy, but it works. On aesthetic grounds, one might include in \code{sdemodel{}} the simpler equivalent \verb|phiprime = c*x^(c-1)/(x^c - a^c)|.
 
 The log-likelihood is not significantly different from the one from the additive model. Not much difference either in the fitted curves:
 <<>>=
@@ -367,7 +367,7 @@ Let us fit the $b$-local version from Example 3:
               method="nlme"))
 @
 \noindent
-Convergence fails. There is an optional argument \code{control} in \code{sdefit()}, which acepts a list of control parameters to be passed on to \code{nlme()} or \code{nls()}. Use it to increase the ``PNLS tolerance'' to 0.01, from the default 0.001:
+Convergence fails. There is an optional argument \code{control} in \code{sdefit()}, which accepts a list of control parameters to be passed on to \code{nlme()} or \code{nls()}. Use it to increase the ``PNLS tolerance'' to 0.01, from the default 0.001:
 <<>>=
 (blocal_mx <- sdefit(m, x="height", t="age", unit="Seed",
               data=Loblolly, global=c(a=70, c=0.5), local=c(b=0.1),
@@ -480,7 +480,7 @@ For eq.~\eqref{eq:trivial}, one could use
 and for eq.~\eqref{eq:linear},
 \[  y = \exp\left[\left(\frac{x}{a - x}\right)^k\right] = \exp[(a/x - 1)^{-k}] \;.  \]
 
-A univariate time-invariant (aka automomous) differential equation has the form
+A univariate time-invariant (aka autonomous) differential equation has the form
 \[  \der{x}{t} = f(x) \;. \]
 These are often preferred to equations that include both $x$ and $t$ on the right-hand side, because natural laws are not supposed to change from one week to the next. From $\dd x / f(x) = \dd t$ we get 
 \[

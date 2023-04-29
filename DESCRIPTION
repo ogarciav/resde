@@ -1,6 +1,6 @@
 Package: resde
 Title: Estimation in Reducible Stochastic Differential Equations
-Version: 1.0
+Version: 1.1
 Authors@R: 
     person(given = "Oscar",
            family = "Garcia",

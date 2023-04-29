@@ -61,40 +61,36 @@ sdemodel <- function(phi=~x, phiprime=NULL, beta0=~beta0, beta1=~beta1,
 #'   mod <- sdemodel(); sdemodel_display(mod)
 sdemodel_display <- function(model){
   m <- model$m; pars <- model$pars
-  cat("Model:\n")
+  message("Model:")
   vars <- all.vars(str2lang(m$phi))
   vars <- vars[vars != "x"]
   if(length(vars) > 0){
     vars <- paste(",", vars, collapse="")
   }
-  cat("       y = phi(x", vars, ") = ", m$phi, sep="", fill=TRUE)
-  cat("       y' = phiprime(x", vars, ") = ", m$phiprime, sep="", fill=TRUE)
+  message("       y = phi(x", vars, ") = ", m$phi)
+  message("       y' = phiprime(x", vars, ") = ", m$phiprime)
   if(m$mup == "1"){
-    cat("       dY = (", m$beta0, " + ", m$beta1, " * Y) dt + sigmap * dW",
-        sep="", fill=TRUE)
+    message("       dY = (", m$beta0, " + ", m$beta1, " * Y) dt + sigmap * dW")
   } else {
-    cat("       dY = (", m$beta0, " + ", m$beta1, " * Y) dt + ", m$mup,
-        " * sigmap * dW", sep="", fill=TRUE)
+    message("       dY = (", m$beta0, " + ", m$beta1, " * Y) dt + ", m$mup,
+        " * sigmap * dW")
   }
   if(m$mu0 == "0"){
-    cat("       Y(", m$t0, ") = phi(", m$x0, vars, ")",
-        sep="", fill=TRUE)
+    message("       Y(", m$t0, ") = phi(", m$x0, vars, ")")
   } else if(m$mu0 == "1"){
-    cat("       Y(", m$t0, ") = phi(", m$x0, vars, ") + sigma0 * e0",
-        sep="", fill=TRUE)
+    message("       Y(", m$t0, ") = phi(", m$x0, vars, ") + sigma0 * e0")
   } else {
-    cat("       Y(", m$t0, ") = phi(", m$x0, vars, ") + ", m$mu0,
-        " * sigma0 * e0", sep="", fill=TRUE)
+    message("       Y(", m$t0, ") = phi(", m$x0, vars, ") + ", m$mu0,
+        " * sigma0 * e0")
   }
   if(m$mum == "0"){
-    cat("       yi = Y(ti)", sep="", fill=TRUE)
+    message("       yi = Y(ti)")
   } else if(m$mum == "1"){
-    cat("       yi = Y(ti) + sigmam * ei", sep="", fill=TRUE)
+    message("       yi = Y(ti) + sigmam * ei")
   } else {
-    cat("       yi = Y(ti) + ", m$mum, " * sigmam * ei", sep="", fill=TRUE)
+    message("       yi = Y(ti) + ", m$mum, " * sigmam * ei")
   }
-  cat("Parameters:\n")
-  cat("       ")
-  cat(sort(pars), sep=", ", fill=TRUE)
+  message("Parameters:")
+  message("       ", paste0(sort(pars), collapse=", "))
   invisible(model)
 }

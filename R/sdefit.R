@@ -118,8 +118,8 @@ sdefit <- function(model, x, t, unit=NULL, data=NULL, start=NULL,
 
   # Transformation and derivative
   if(!trfuns){
-    phi <<- str2fun_theta(m$phi)  # can avoid globals??
-    phiprime <<- str2fun_theta(m$phiprime)
+    assign("phi", str2fun_theta(m$phi), .GlobalEnv)
+    assign("phiprime", str2fun_theta(m$phiprime), .GlobalEnv)
   } else {
       warning("Using external phi and phiprime functions", call.=FALSE)
   }
