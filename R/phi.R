@@ -1,38 +1,33 @@
-# File contents: phi, phiprime
+# File contents: userphi, userphiprime
 
-#' External transformation and derivative functions
+#' Optional external transformation and derivative functions
 #'
-#' Dummy external transformation definitions, called by \code{sdefit()}
-#'   if \code{trfuns == TRUE}. To be completed by the user.
+#' Skeletons for user-supplied transformation and drivative functions, used by
+#'   \code{sdefit()} if specified in parameters \code{phi} and/or
+#'   \code{phiprime}. To be completed by the user.
 #'
 #' @describeIn phi Transformation
 #'
 #' @param x     Numeric vector, variable to be transformed. 
 #' @param theta Named list of transformation parameters
 #'
-#' @return \code{phi}:  Transformed variable
+#' @return:  Transformed variable
 #'
 #' @keywords internal
 #' @examples
-#' \dontrun{   phi(20, list(a=70, c=0.5))   }
+#' \dontrun{   userphi(20, list(a=70, c=0.5))   }
 
-phi <- function(x, theta){
-  f <- get0("phi", .GlobalEnv, mode="function", inherits=FALSE)
-  if(is.null(f))
-    stop("phi() not found", call. = FALSE)
-  f(x, theta)
+userphi <- function(x, theta){
+  # Insert code for the transformation here
 }
 
 #' @describeIn phi Derivative
 #'
-#' @return \code{phiprime}:  Transformation derivative
+#' @return:  Transformation derivative
 #'
 #' @keywords internal
 #' @examples
-#' \dontrun{   phiprime(20, list(a=70, c=0.5))   }
-phiprime <- function(x, theta){
-  f <- get0("phiprime", .GlobalEnv, mode="function", inherits=FALSE)
-  if(is.null(f))
-    stop("phiprime() not found", call. = FALSE)
-  f(x, theta)
+#' \dontrun{   userphiprime(20, list(a=70, c=0.5))   }
+userphiprime <- function(x, theta){
+  # Insert code for the derivative here
 }

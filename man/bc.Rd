@@ -38,13 +38,13 @@ These functions calculate the Box-Cox transformation, its inverse, and derivativ
 }
 \section{Functions}{
 \itemize{
-\item \code{bc}: The Box-Cox transformation
+\item \code{bc()}: The Box-Cox transformation
 
-\item \code{bc_inv}: Inverse of the Box-Cox transformation
+\item \code{bc_inv()}: Inverse of the Box-Cox transformation
 
-\item \code{bc_prime}: Derivative of the Box-Cox transformation
+\item \code{bc_prime()}: Derivative of the Box-Cox transformation
+
 }}
-
 \examples{
 bc(0.5, 1.5)
 bc(1, 0)

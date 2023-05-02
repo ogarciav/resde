@@ -1,6 +1,5 @@
 # File contents: uvector, uvector_noh, logdet.and.v
 
-
 #' ML estimation vector for reducible SDEs
 #'
 #' @describeIn uvector Estimation vector, general
@@ -28,7 +27,7 @@
 #' with \eqn{L} lower-triangular.
 #'
 #' The three functions are essentially unchanged from García (2019)
-#' <\url{https://doi.org/10.1007/s00180-018-0837-4}>,
+#' <\doi{10.1007/s00180-018-0837-4}>,
 #' except for a somewhat safer computation for very small \code{beta1},
 #' and adding in \code{logdet_and_v()} a shortcut for when \eqn{L} is
 #' diagonal (e.g., when \eqn{\sigma_m = 0}). 

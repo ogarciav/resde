@@ -65,20 +65,20 @@ and a function \code{phiprime(x, theta)} for the derivative dy/dx, where
 with \eqn{L} lower-triangular.
 
 The three functions are essentially unchanged from García (2019)
-<\url{https://doi.org/10.1007/s00180-018-0837-4}>,
+<\doi{10.1007/s00180-018-0837-4}>,
 except for a somewhat safer computation for very small \code{beta1},
 and adding in \code{logdet_and_v()} a shortcut for when \eqn{L} is
 diagonal (e.g., when \eqn{\sigma_m = 0}).
 }
 \section{Functions}{
 \itemize{
-\item \code{uvector}: Estimation vector, general
+\item \code{uvector()}: Estimation vector, general
 
-\item \code{uvector_noh}: Estimation vector, non-hierarchical
+\item \code{uvector_noh()}: Estimation vector, non-hierarchical
 
-\item \code{logdet.and.v}: Logarithm of determinant, and \eqn{v} vector
+\item \code{logdet.and.v()}: Logarithm of determinant, and \eqn{v} vector
+
 }}
-
 \examples{
 \dontrun{
 uvector(x=runif(5), t=1:5, unit = NULL, beta0=0, beta1=1, eta=0, eta0=0,

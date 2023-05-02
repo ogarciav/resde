@@ -42,13 +42,13 @@ be specified by name. Uses \code{\link{bc}(), bc_inv(), bc_prime()}.
 }
 \section{Functions}{
 \itemize{
-\item \code{unitran}: Unified transformation.
+\item \code{unitran()}: Unified transformation.
 
-\item \code{unitran_inv}: Inverse of unitran().
+\item \code{unitran_inv()}: Inverse of unitran().
 
-\item \code{unitran_prime}: Derivative of \code{unitran()} with respect to \code{x}.
+\item \code{unitran_prime()}: Derivative of \code{unitran()} with respect to \code{x}.
+
 }}
-
 \examples{
 curve(unitran(x, "Gompertz"))  # same as unitran(x, alpha=0, beta=0)
 curve(unitran_inv(y, "logistic"), xname="y", from=-4, to=4)

@@ -118,6 +118,8 @@ sdefit <- function(model, x, t, unit=NULL, data=NULL, start=NULL,
 
   # Transformation and derivative
   if(!trfuns){
+    # phi <- str2fun_theta(m$phi)
+    # phiprime <- str2fun_theta(m$phiprime)
     assign("phi", str2fun_theta(m$phi), .GlobalEnv)
     assign("phiprime", str2fun_theta(m$phiprime), .GlobalEnv)
   } else {
