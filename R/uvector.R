@@ -67,6 +67,11 @@
 uvector <- function(x, t, unit = NULL, beta0, beta1, eta, eta0, x0, t0, lambda,
                     mum = 1, mu0 = 1, mup = 1, sorted = FALSE, final = FALSE)
 {
+  # Retrieve the transformation functions, see comment at the top of sdefit.R
+  if(!exists("phi")) phi <- get("phi", trfuns)  # or phi <- trfuns$phi
+  if(!exists("phiprime")) phiprime <- get("phiprime", trfuns)
+  #    the conditionals preserve compatibility with the original uvector()
+
   if (is.null(unit)) unit <- rep(1, length(x)) # single unit
   if (length(unique(eta)) > 1 || length(unique(eta0)) > 1)
     stop("eta and eta0 must be global")
