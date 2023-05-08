@@ -4,55 +4,55 @@
 #'
 #' @describeIn uvector Estimation vector, general
 #' @order 1
-#' 
-#' @description
-#' These functions are not normally called directly by the user.
-#' Function \code{uvector()} is used by \code{\link{sdefit}()}.
-#' Function \code{uvector_noh()} is a more limited version, maintained for
-#' documentation purposes. Function \code{logdet_and_v()} is used by
-#' \code{uvector()} and \code{uvector_noh()}.
-#' 
-#' @details
-#' \code{uvector()} and \code{uvector_noh()} calculate a vector of
-#' residuals for sum of squares minimization by \code{nls()} or
-#' \code{nlme()}. The first one works both for single-unit and for bilevel
-#' hierarchical models. It is backward-compatible with \code{uvector_noh()},
-#' which is only for single-unit models but simpler and easier to understand.
-#' They require a transformation function \code{phi(x, theta)},
-#' and a function \code{phiprime(x, theta)} for the derivative dy/dx, where
-#' \code{theta} is a list containing the transformation parameters.
 #'
-#' \code{logdet_and_v()} calculates \eqn{\log[\det(L)]}{log[det(L)]}
-#'    and \eqn{v = L^{-1} z}{v = L^-1 z}, where \eqn{C = LL'},
-#' with \eqn{L} lower-triangular.
+#' @description These functions are not normally called directly by the user.
+#' Function \code{uvector()} is used by \code{\link{sdefit}()}. Function
+#' \code{uvector_noh()} is a more limited version, maintained for documentation
+#' purposes. Function \code{logdet_and_v()} is used by \code{uvector()} and
+#' \code{uvector_noh()}.
+#'
+#' @details \code{uvector()} and \code{uvector_noh()} calculate a vector of
+#' residuals for sum of squares minimization by \code{nls()} or \code{nlme()}.
+#' The first one works both for single-unit and for bilevel hierarchical models.
+#' It is backward-compatible with \code{uvector_noh()}, which is only for
+#' single-unit models but simpler and easier to understand. They require a
+#' transformation function \code{phi(x, theta)}, and a function
+#' \code{phiprime(x, theta)} for the derivative dy/dx, where \code{theta} is a
+#' list containing the transformation parameters.
+#'
+#' \code{logdet_and_v()} calculates \eqn{\log[\det(L)]}{log[det(L)]} and \eqn{v
+#' = L^{-1} z}{v = L^-1 z}, where \eqn{C = LL'}, with \eqn{L} lower-triangular.
 #'
 #' The three functions are essentially unchanged from García (2019)
-#' <\doi{10.1007/s00180-018-0837-4}>,
-#' except for a somewhat safer computation for very small \code{beta1},
-#' and adding in \code{logdet_and_v()} a shortcut for when \eqn{L} is
-#' diagonal (e.g., when \eqn{\sigma_m = 0}). 
+#' <\doi{10.1007/s00180-018-0837-4}>, except for a somewhat safer computation
+#' for very small \code{beta1}, and adding in \code{logdet_and_v()} a shortcut
+#' for when \eqn{L} is diagonal (e.g., when \eqn{\sigma_m = 0}). The
+#' transformation functions \code{phi} and \code{phiprime} can be passed as
+#' globals, as in the original, or in an environment named \code{trfuns}.
 #'
 #' @param x,t Data vectors
 #' @param unit Unit id vector, if any.
 #' @param beta0,beta1,eta,eta0,x0,t0 SDE parameters or re-parameterizations.
-#' @param lambda Named list of parameters(s) for \code{phi()}, possibly local vectors.
+#' @param lambda Named list of parameters(s) for \code{phi()}, possibly local
+#'   vectors.
 #' @param mum,mu0,mup Optional \eqn{\sigma} multipliers.
 #' @param sorted Data already ordered by increasing t?
 #' @param final Mode, see below.
-#' 
-#' @param cdiag Vector with the diagonal elements \eqn{c_{ii}}{c[i, i]} of \eqn{C}.
-#' @param csub Vector with sub-diagonal \eqn{c_{i, i-1}}{c[i, i-1]} for \eqn{i > 1}.
+#'
+#' @param cdiag Vector with the diagonal elements \eqn{c_{ii}}{c[i, i]} of
+#'   \eqn{C}.
+#' @param csub Vector with sub-diagonal \eqn{c_{i, i-1}}{c[i, i-1]} for \eqn{i >
+#'   1}.
 #' @param z A numeric vector
-#' 
-#' @return
-#' \code{uvector()} and \code{uvector_noh()}: If \code{final = FALSE}
-#' (default), return a vector whose sum of squares should be
-#' minimized over the parameters to obtain maximum-likelihood estimates.
-#' If \code{final = TRUE}, passing the ML parameter estimates returns a list
-#' with the sigma estimates and the maximized log-likelihood.
-#' 
+#'
+#' @return \code{uvector()} and \code{uvector_noh()}: If \code{final = FALSE}
+#' (default), return a vector whose sum of squares should be minimized over the
+#' parameters to obtain maximum-likelihood estimates. If \code{final = TRUE},
+#' passing the ML parameter estimates returns a list with the sigma estimates,
+#' the maximized log-likelihood, and AIC and BIC criteria..
+#'
 #' \code{logdet_and_v()}: List with elements \code{logdet} and \code{v}.
-#'  
+#'
 #' @export
 #'
 #' @examples
@@ -62,7 +62,7 @@
 #' logdet.and.v(1:3, c(0,.2,.1), 3:1)
 #' }
 #' @usage uvector(x, t, unit = NULL, beta0, beta1, eta, eta0, x0, t0, lambda,
-#'    mum = 1, mu0 = 1, mup = 1, sorted = FALSE, final = FALSE)
+#'   mum = 1, mu0 = 1, mup = 1, sorted = FALSE, final = FALSE)
 
 uvector <- function(x, t, unit = NULL, beta0, beta1, eta, eta0, x0, t0, lambda,
                     mum = 1, mu0 = 1, mup = 1, sorted = FALSE, final = FALSE)

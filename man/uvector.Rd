@@ -7,7 +7,7 @@
 \title{ML estimation vector for reducible SDEs}
 \usage{
 uvector(x, t, unit = NULL, beta0, beta1, eta, eta0, x0, t0, lambda,
-   mum = 1, mu0 = 1, mup = 1, sorted = FALSE, final = FALSE)
+  mum = 1, mu0 = 1, mup = 1, sorted = FALSE, final = FALSE)
 
 uvector_noh(x, t, beta0, beta1, eta, eta0, x0, t0, lambda, final = FALSE)
 
@@ -20,7 +20,8 @@ logdet.and.v(cdiag, csub = NULL, z)
 
 \item{beta0, beta1, eta, eta0, x0, t0}{SDE parameters or re-parameterizations.}
 
-\item{lambda}{Named list of parameters(s) for \code{phi()}, possibly local vectors.}
+\item{lambda}{Named list of parameters(s) for \code{phi()}, possibly local
+vectors.}
 
 \item{mum, mu0, mup}{Optional \eqn{\sigma} multipliers.}
 
@@ -28,47 +29,49 @@ logdet.and.v(cdiag, csub = NULL, z)
 
 \item{final}{Mode, see below.}
 
-\item{cdiag}{Vector with the diagonal elements \eqn{c_{ii}}{c[i, i]} of \eqn{C}.}
+\item{cdiag}{Vector with the diagonal elements \eqn{c_{ii}}{c[i, i]} of
+\eqn{C}.}
 
-\item{csub}{Vector with sub-diagonal \eqn{c_{i, i-1}}{c[i, i-1]} for \eqn{i > 1}.}
+\item{csub}{Vector with sub-diagonal \eqn{c_{i, i-1}}{c[i, i-1]} for \eqn{i >
+1}.}
 
 \item{z}{A numeric vector}
 }
 \value{
 \code{uvector()} and \code{uvector_noh()}: If \code{final = FALSE}
-(default), return a vector whose sum of squares should be
-minimized over the parameters to obtain maximum-likelihood estimates.
-If \code{final = TRUE}, passing the ML parameter estimates returns a list
-with the sigma estimates and the maximized log-likelihood.
+(default), return a vector whose sum of squares should be minimized over the
+parameters to obtain maximum-likelihood estimates. If \code{final = TRUE},
+passing the ML parameter estimates returns a list with the sigma estimates,
+the maximized log-likelihood, and AIC and BIC criteria..
 
 \code{logdet_and_v()}: List with elements \code{logdet} and \code{v}.
 }
 \description{
 These functions are not normally called directly by the user.
-Function \code{uvector()} is used by \code{\link{sdefit}()}.
-Function \code{uvector_noh()} is a more limited version, maintained for
-documentation purposes. Function \code{logdet_and_v()} is used by
-\code{uvector()} and \code{uvector_noh()}.
+Function \code{uvector()} is used by \code{\link{sdefit}()}. Function
+\code{uvector_noh()} is a more limited version, maintained for documentation
+purposes. Function \code{logdet_and_v()} is used by \code{uvector()} and
+\code{uvector_noh()}.
 }
 \details{
 \code{uvector()} and \code{uvector_noh()} calculate a vector of
-residuals for sum of squares minimization by \code{nls()} or
-\code{nlme()}. The first one works both for single-unit and for bilevel
-hierarchical models. It is backward-compatible with \code{uvector_noh()},
-which is only for single-unit models but simpler and easier to understand.
-They require a transformation function \code{phi(x, theta)},
-and a function \code{phiprime(x, theta)} for the derivative dy/dx, where
-\code{theta} is a list containing the transformation parameters.
+residuals for sum of squares minimization by \code{nls()} or \code{nlme()}.
+The first one works both for single-unit and for bilevel hierarchical models.
+It is backward-compatible with \code{uvector_noh()}, which is only for
+single-unit models but simpler and easier to understand. They require a
+transformation function \code{phi(x, theta)}, and a function
+\code{phiprime(x, theta)} for the derivative dy/dx, where \code{theta} is a
+list containing the transformation parameters.
 
-\code{logdet_and_v()} calculates \eqn{\log[\det(L)]}{log[det(L)]}
-   and \eqn{v = L^{-1} z}{v = L^-1 z}, where \eqn{C = LL'},
-with \eqn{L} lower-triangular.
+\code{logdet_and_v()} calculates \eqn{\log[\det(L)]}{log[det(L)]} and \eqn{v
+= L^{-1} z}{v = L^-1 z}, where \eqn{C = LL'}, with \eqn{L} lower-triangular.
 
 The three functions are essentially unchanged from García (2019)
-<\doi{10.1007/s00180-018-0837-4}>,
-except for a somewhat safer computation for very small \code{beta1},
-and adding in \code{logdet_and_v()} a shortcut for when \eqn{L} is
-diagonal (e.g., when \eqn{\sigma_m = 0}).
+<\doi{10.1007/s00180-018-0837-4}>, except for a somewhat safer computation
+for very small \code{beta1}, and adding in \code{logdet_and_v()} a shortcut
+for when \eqn{L} is diagonal (e.g., when \eqn{\sigma_m = 0}). The
+transformation functions \code{phi} and \code{phiprime} can be passed as
+globals, as in the original, or in an environment named \code{trfuns}.
 }
 \section{Functions}{
 \itemize{

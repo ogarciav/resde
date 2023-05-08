@@ -15,24 +15,25 @@ userphiprime(x, theta)
 \item{theta}{Named list of transformation parameters}
 }
 \value{
-:  Transformed variable
+Transformed variable
 
-:  Transformation derivative
+Transformation derivative
 }
 \description{
-Skeletons for user-supplied transformation and drivative functions, used by
+Templates for user-supplied transformation and drivative functions, used by
   \code{sdefit()} if specified in parameters \code{phi} and/or
   \code{phiprime}. To be completed by the user.
 }
 \section{Functions}{
 \itemize{
-\item \code{userphi()}: Transformation
+\item \code{userphi()}: transformation
 
-\item \code{userphiprime()}: Derivative
+\item \code{userphiprime()}: derivative
 
 }}
 \examples{
 \dontrun{   userphi(20, list(a=70, c=0.5))   }
 \dontrun{   userphiprime(20, list(a=70, c=0.5))   }
+
 }
 \keyword{internal}

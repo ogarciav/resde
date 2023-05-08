@@ -2,7 +2,7 @@
 % Please edit documentation in R/sdemodel.R
 \name{sdemodel_display}
 \alias{sdemodel_display}
-\title{Display model specification}
+\title{Display the model specification}
 \usage{
 sdemodel_display(model)
 }
@@ -13,7 +13,7 @@ sdemodel_display(model)
 Invisibly returns its argument
 }
 \description{
-Display model specification
+Display the model specification
 }
 \examples{
   mod <- sdemodel(); sdemodel_display(mod)

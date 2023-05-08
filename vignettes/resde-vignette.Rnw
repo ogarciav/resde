@@ -109,7 +109,7 @@ options(width=67)
 \section{Introduction}
 \label{sec:intro}
 
-Package \pkg{resde} computes maximum-likelihood (ML) parameter estimates for reducible stochastic differential equations (RSDE, more on those in a minute). Observations are at discrete points in time, not necessarily evenly spaced, and may include measurement error. Currently, \pkg{resde} handles only univariate time-independent RSDEs. In the simplest case, there is a single individual or sampling unit (\emph{unit}, for short). Alternatively, there may be a set of units, with some parameters common to all units (\emph{global}), and others specific to each unit (\emph{local}). Estimation in these \emph{two-level hierarchical models} can use either a fixed effects approach, or more fashionable mixed effects methods.
+Package \pkg{resde} computes maximum-likelihood (ML) parameter estimates for reducible stochastic differential equations (RSDEs, more on these in a minute). Observations are at discrete points in time, not necessarily evenly spaced, and may include measurement error. Currently, \pkg{resde} handles only univariate time-independent RSDEs. In the simplest case, there is a single individual or sampling unit (\emph{unit}, for short). More generally, there may be a set of units, with some parameters common to all units (\emph{global}), and others specific to each unit (\emph{local}). Estimation in these \emph{two-level hierarchical models} can use either a fixed effects approach, or more fashionable mixed effects methods.
 
 RSDEs are SDEs that can be reduced to linear by a change of variables. This may seem unduly restrictive, but we shall see that many important problems can be formulated this way. In particular, linearizing transformations exist for most of the univariate growth models encountered in the literature. In fact, any differential equation with an invertible closed-form solution can be linearized (section \ref{sec:curves}).
 
@@ -117,7 +117,7 @@ In \citet{sdes}, I showed an \lang{R} function, \code{uvector()}, that generates
 
 Section 3 of \citet{sdes} provides a quick introduction to SDEs. \citet{sys} might be useful for those not comfortable with dynamical systems.
 
-The following section describes the model equations, and how they are specified in \code{sdemodel()}. Section \ref{sec:noh} explains the use of \code{sdefit()} for single-unit models, and section \ref{sec:hier} does the same for hierarchical ones. We go over all the SDE examples from \citet{sdes}, where a few additional details can be found. Finally, section \ref{sec:more} covers some non-essential odds and ends.
+The following section describes the model equations, and how they are specified in \code{sdemodel()}. Section \ref{sec:noh} explains the use of \code{sdefit()} for single-unit models, and section \ref{sec:hier} does the same for hierarchical ones. We go over all the SDE examples from \citet{sdes}, where a few additional details can be found. Look also in there for literature references. Finally, section \ref{sec:more} covers some non-essential odds and ends.
 
 
 \section{The model}
@@ -143,10 +143,10 @@ That is, $X$ obeys a \emph{reducible} (to linear) SDE. There are $n$ possibly no
 The $\epsilon_i$ are mutually independent, and independent of the Wiener (aka Brownian motion) random process $W(t)$.
 
 There may be a re-parameterization, where any of the ``base'' parameters $\beta_0$, $\beta_1$, $t_0$, $y_0$, $\mu_p$, $\mu_0$, $\mu_m$ can be replaced by functions of new parameters. For instance, an SDE
-\[  \dd X^c = b(a^c - X^c) \dd t + \sqrt{b} \dd W \;,\]
+\[  \dd X^c = b(a^c - X^c) \dd t + \sqrt{b} \sigma_p \dd W \;,\]
 with initial condition fixed at the origin,
-can be specified by the transformation $Y = \varphi(X, c) = X^c$ and the parameter substitutions $\beta_0 \rightarrow b a^c, \beta_1 \rightarrow -b, \mu_p \rightarrow \sqrt{b}$, and
-$t_0, x_0, \mu_0 \rightarrow 0$. If there are no measurement errors one would set $\mu_m \rightarrow 0$, otherwise $\mu_m \rightarrow 1$.
+can be specified by the transformation $Y = \varphi(X, c) = X^c$ and the parameter substitutions $\beta_0 \leftarrow b a^c, \beta_1 \leftarrow -b, \mu_p \leftarrow \sqrt{b}$, and
+$t_0, x_0, \mu_0 \leftarrow 0$. If there are no measurement errors one would set $\mu_m \leftarrow 0$, otherwise $\mu_m \leftarrow 1$.
 
 In \pkg{resde}, the model specification is done with function \code{sdemodel()}. The arguments and defaults are
 <<sdemodel, eval=FALSE>>=
@@ -162,7 +162,7 @@ library(resde)
 exmpl <- sdemodel(phi=~x^c, beta0=~b*a^c, beta1=~-b, mup=~sqrt(b))
 @
 \noindent
-The leading \verb|##| are not displayed by \lang{R}, but are used here to distinguish outputs from inputs. Always check the displayed result to see if that is what you meant. The display can be obtained again with \verb|sdemodel_display(exmpl)|. More examples below.
+The leading \verb|##| are not displayed by \lang{R}, but are used here to distinguish outputs from inputs. Always check the displayed result to see if that is what you meant. The display can be obtained again with \verb|sdemodel_display(exmpl)|. Note that here the errors \code{ei} and \code{e0} have unit vsriances, so that $\epsilon_i = \sigma_m e_i$ and $\epsilon_0 = \sigma_0 e_0$. More examples below.
 
 
 \section{Single-unit estimation}
@@ -215,8 +215,8 @@ f
 @
 \noindent
 The parameter estimates are $a = 72.55$, $b = 0.0967$, $c =
-0.5024$, $\sigma_p = 0$, and $\sigma_m = 0.04865$, with a maximized log-likelihood value
-of $-4.0$. I'll explain \code{eta} shortly. This would suggest that most of the variability arises from measurement errors. However, $\sigma_p = 0$ is at the boundary of the admissible values, and therefore this could easily be a local optimum different from the global one. To confirm, we force $\sigma_m=0$, as suggested by the warning:
+0.5024$, $\sigma_p = 0$, and $\sigma_m = 0.04866$, with a maximized log-likelihood value
+of $-4.0$. I'll explain \code{eta} shortly. This would suggest that most of the variability arises from measurement errors. However, $\sigma_p = 0$ is at the boundary of the admissible values, and therefore this could be a local optimum different from the global one. To confirm, we force $\sigma_m=0$ (or rather $\mu_m \sigma_m = 0$), as suggested by the warning:
 <<>>=
 m <- sdemodel(phi=~x^c, beta0=~b*a^c, beta1=~-b, mum=0)
 sdefit(m, x="height", t="age", data=lob301,
@@ -389,11 +389,11 @@ coef(blocal_mx$fit)
 
 \subsection{Derivatives}
 
-\code{Deriv()} seems to do a good job of producing transformation derivatives, although as we have seen, sometimes not in the simplest possible form. If desired, the argument \code{phiprime} can be used. Either way, \code{sdefit()} generates global functions \code{phi()} and \code{phiprime()} to compute transformation and derivatives, respectively. For trouble-shooting, setting \code{trfuns=FALSE} in \code{sdefit()} suppresses the generation of these functions, allowing the user to provide his/her own. If necessary, you can inspect the generated \code{phi()} and \code{phiprime()} to see the proper format. Or run something like \verb|phi <- str2fun_theta("(x/a)^c")| for a starting point.
+\code{Deriv()} seems to do a good job of producing transformation derivatives, although as we have seen, sometimes not in the simplest possible form. If desired, perhaps for troubleshooting, the name of a user-supplied derivative function can be given in the argument \code{phiprime} of \code{sdefit()}. The same can be done for the transformation \code{phi}. See \code{phi.R} for suitable function templates.
 
 \subsection{Under the hood}
 
-The aim of \pkg{resde} is to facilitate the application of the function \code{uvector()} from \citet{sdes}. That function uses tricks based on work by Furnival and by Box and Cox to compute values such that minimizing the sum of their squares produces maximum-likelihood parameter estimates. The sum of squares is minimized with \code{nls()} from package \pkg{stats}, or with \code{nlme()} from package \pkg{nlme}. Setting up a call to \code{uvector()}, as done in \citet{sdes}, can be rather complicated, a process that is ``mechanized'' by \code{sdemodel()} and \code{sdefit()}. The generated call to \code{uvector()} can be seen with \code{formula(f\$fit)} or \code{(f\$fit)\$call}, where \code{f} is the output from \code{sdefit()}. Conceivably, there may be applications where it could be necessary to use \code{uvector()} directly.
+The aim of \pkg{resde} is to facilitate the application of the function \code{uvector()} from \citet{sdes}. That function uses tricks based on work by Furnival and by Box and Cox to compute values such that minimizing the sum of their squares produces maximum-likelihood parameter estimates. The sum of squares is minimized with \code{nls()} from package \pkg{stats}, or with \code{nlme()} from package \pkg{nlme}. Setting up a call to \code{uvector()}, as done in \citet{sdes}, can be rather complicated, a process that is ``mechanized'' by \code{sdemodel()} and \code{sdefit()}. The generated call to \code{uvector()} can be seen with \code{formula(f\$fit)} or \code{(f\$fit)\$call}, where \code{f} is the output from \code{sdefit()}. Conceivably, there may be applications where it might be necessary to use \code{uvector()} directly.
 
 When there is both process and measurement noise, \pkg{resde} uses internally an additional parameter, \code{eta}, that corresponds to the relative measurement error $\eta = \sigma_m^2 / (\sigma_p^2 + \sigma_m^2)$. It must take values between 0 ($\sigma_m = 0$), and 1 ($\sigma_p = 0$). With \code{nls()}, algorithm \code{port} performs the constrained optimization. For mixed effects, \code{nlme()} does not allow constraints. Therefore, \code{optimize()} is used in that case to perform a one-dimensional optimization over \code{eta}, calling \code{nlme()} at each step.
 
@@ -424,12 +424,50 @@ for(i in seq_along(eta)){
 plot(lgLik ~ eta)
 @
 \noindent
-We see that there are local optima at $\eta = 0$ ($\sigma_m = 0$), and at $\eta = 1$ ($\sigma_p = 0$). This is what was causing trouble with the optimizations. However, the significance of the log-likelihood differences is marginal. One may conclude that the data cannot tell us much about the error structure, so that we are justified in choosing it from prior knowledge. E.g., if the height observations were derived from the tree rings, the measurement errors may be negligible compared to the environmental noise, and $\sigma_m = 0$ would be reasonable.
+We see that there are local optima at $\eta = 0$ ($\sigma_m = 0$), and at $\eta = 1$ ($\sigma_p = 0$). This is what was causing trouble with the optimizations. However, the significance of the log-likelihood differences is marginal. One may conclude that the data cannot tell us much about the error structure, so that we are justified in choosing it from prior knowledge. E.g., if the height observations were derived from tree rings, the measurement errors may be negligible compared to the environmental noise, and $\sigma_m = 0$ would be reasonable.
 
 
 \subsection{On transformations}
 
-\subsubsection{Curves}
+\subsubsection{A unifying transformation}
+\label{sec:uni}
+
+It has been found that, allowing linear transformations of $x$ and $t$, nearly all the growth curve equations in the literature can be unified in a family of functions with two shape parameters:
+\begin{equation} \label{eq:uni}
+    U(x, \alpha, \beta) \equiv -[-x^{(\alpha)}]^{(\beta)} = t \;,
+\end{equation}
+in terms of the Box-Cox transformation defined in eq.~\eqref{eq:bc}. For instance, the Richards is the spacial case $\beta = 0$, and the Hosfeld IV corresponds to $\alpha = -1, \beta < 0$ (\citet{uni}, and \url{https://github.com/ogarciav/grex/}).
+
+In eq.~\eqref{eq:uni}, $x$ ranges between 0 and 1. If $x$ goes from 0 up to an asymptote $a$, we have $F^{-1}(x) = U(x/a, \alpha, \beta)$. It is also possible to have negative scale factors, which reverse the $x$ and $t$ axes, and then $F^{-1}(x) = U(1 - x/a, \alpha, \beta)$.
+
+\fig{grex}{Sigmoid growth equations determined by the unified transformation with parameters $a = \alpha$ and $b = \beta$. Items in parenthesis correspond to negative scale factors on $x$ and $t$ (reversed axes). Contours indicate the height of the inflection point relative to the range of $x$. From Garc\'ia (2005, 2008), see \url{https://web.unbc.ca/~garcia/growth&yield/grex/}  or \citet{uni} for model references.}
+
+Figure \ref{fig:grex} shows the useful range of $\alpha$ and $\beta$, and the correspondence to common growth equation models. The unifying transformation $U(x, \alpha, \beta)$ has been implemented in the function \code{unitran()}, see \code{?unitran} for details. As an example, the following shows the inverse logistic:
+<<>>=
+curve(unitran(x, alpha=-1, beta=0))
+@
+\noindent
+The function can also be called with names: \code{curve(unitran(x, "logistic"))} produces the same result.
+
+\begin{sloppypar}
+The unified transformation can be useful when hunting for a suitable model form. With tree \#301 again, applying eq.~\eqref{eq:trivial}, let us try $y = U(x/a, \alpha, \beta)$. This is similar to what we did in Example 2 for the Richards model.
+\end{sloppypar}
+<<>>=
+m <- sdemodel(phi=~unitran(x/a, alpha=alpha, beta=beta,
+  reverse="no"), phiprime=~unitran_prime(x/a, alpha=alpha,
+  beta=beta, reverse="no")/a, beta0=~b, beta1=0, mum=0)
+(f <- sdefit(m, x="height", t="age", data=lob301, start=c(a=70,
+  b=0.1, alpha=0.5, beta=0)))
+@
+\noindent
+As expected, \code{summary(f\$fit)} indicates over-parameterization. But the result might suggest trying the Levacovic, Korf or Schumacher models as more parsimonious named alternatives, e.g., by moving \code{beta} out of \code{start} and into \code{known=c(beta=-0.5)}.
+
+\begin{sloppypar}
+One could also try the reversed form with \code{1-x/a}. The default \code{reverse="auto"} in \code{unitran()} does that automatically, but the discontinuity at $\beta = 0$ causes the optimization to fail. Or perhaps one could experiment with the form corresponding to eq.~\eqref{eq:linear} below. There are limits to what is worth doing with 6 data points, but you get the idea.
+\end{sloppypar} 
+
+
+\subsubsection{More general curves}
 \label{sec:curves}
 
 Consider any growth curve (or other type of) model with trajectories given by some function
@@ -448,7 +486,7 @@ Any linear function of that transformation will also work:
 \begin{equation} \label{eq:trivial}
     y = p F^{-1}(x) + q \quad \rightarrow \quad \der{y}{t} = p \;,
 \end{equation}
-for any constants $p \neq 0, q$.
+for any constants $p \neq 0$ and $q$.
 
 Somewhat more interesting is
 \begin{equation*}
@@ -480,6 +518,10 @@ For eq.~\eqref{eq:trivial}, one could use
 and for eq.~\eqref{eq:linear},
 \[  y = \exp\left[\left(\frac{x}{a - x}\right)^k\right] = \exp[(a/x - 1)^{-k}] \;.  \]
 
+
+\subsubsection{General differential equations}
+\label{sec:genDEs}
+
 A univariate time-invariant (aka autonomous) differential equation has the form
 \[  \der{x}{t} = f(x) \;. \]
 These are often preferred to equations that include both $x$ and $t$ on the right-hand side, because natural laws are not supposed to change from one week to the next. From $\dd x / f(x) = \dd t$ we get 
@@ -495,43 +537,6 @@ Proof: Differentiate $F^{-1}[F(t)] = t$ or $F[F^{-1}(x)] = x$.
 For SDEs, it may be possible to linearize the deterministic part (aka the \emph{trend} or \emph{drift}). Or reduce to a constant the stochastic term (\emph{diffusion} or \emph{volatility}), through the Lamperti transform \citep[][sec.~3]{sdes}. In general, it is not possible to get the desired form for both, but often one of the terms is less important than the other. At any rate, there are good theoretical reasons for why linearity and Gaussianity should go well together.
 
 
-\subsubsection{A unifying transformation}
-\label{sec:uni}
-
-It has been found that, allowing linear transformations of $x$ and $t$, nearly all the growth curve equations in the literature can be unified in a family of functions with two shape parameters:
-\begin{equation} \label{eq:uni}
-    U(x, \alpha, \beta) \equiv -[-x^{(\alpha)}]^{(\beta)} = t \;,
-\end{equation}
-in terms of the Box-Cox transformation defined in eq.~\eqref{eq:bc}. For instance, the Richards is the spacial case $\beta = 0$, and the Hosfeld IV corresponds to $\alpha = -1, \beta < 0$ (\citet{uni}, and \url{http://forestgrowth.unbc.ca/grex/}).
-
-In eq.~\eqref{eq:uni}, $x$ ranges between 0 and 1. If $x$ goes from 0 up to an asymptote $a$, we have $F^{-1}(x) = U(x/a, \alpha, \beta)$. It is also possible to have negative scale factors, which reverse the $x$ and $t$ axes, and then $F^{-1}(x) = U(1 - x/a, \alpha, \beta)$.
-
-\fig{grex}{Sigmoid growth equations determined by the unified transformation with parameters $a = \alpha$ and $b = \beta$. Items in parenthesis correspond to negative scale factors on $x$ and $t$ (reversed axes). Contours indicate the height of the inflection point relative to the range of $x$. From Garc\'ia (2005, 2008), see \url{http://forestgrowth.unbc.ca/grex/}  or \citet{uni} for model references.}
-
-Figure \ref{fig:grex} shows the useful range of $\alpha$ and $\beta$, and the correspondence to common growth equation models. The unifying transformation $U(x, \alpha, \beta)$ has been implemented in the function \code{unitran()}, see \code{?unitran} for details. As an example, the following shows the inverse logistic:
-<<>>=
-curve(unitran(x, alpha=-1, beta=0))
-@
-\noindent
-The function can also be called with names: \code{curve(unitran(x, "logistic"))} produces the same result.
-
-\begin{sloppypar}
-The unified transformation can be useful when hunting for a suitable model form. With tree \#301 again, applying eq.~\eqref{eq:trivial}, let us try $y = U(x/a, \alpha, \beta)$. This is similar to what we did in Example 2 for the Richards model.
-\end{sloppypar}
-<<>>=
-m <- sdemodel(phi=~unitran(x/a, alpha=alpha, beta=beta,
-  reverse="no"), phiprime=~unitran_prime(x/a, alpha=alpha,
-  beta=beta, reverse="no")/a, beta0=~b, beta1=0, mum=0)
-(f <- sdefit(m, x="height", t="age", data=lob301, start=c(a=70,
-  b=0.1, alpha=0.5, beta=0)))
-@
-\noindent
-As expected, \code{summary(f\$fit)} indicates over-parameterization. But the result might suggest trying the Levacovic, Korf or Schumacher models as more parsimonious named alternatives, e.g., by moving \code{beta} out of \code{start} and into \code{known=c(beta=-0.5)}.
-
-\begin{sloppypar}
-One could also try the reversed form with \code{1-x/a}. The default \code{reverse="auto"} in \code{unitran()} does that automatically, but the discontinuity at $\beta = 0$ causes the optimization to fail. Or perhaps one could experiment with the form corresponding to eq.~\eqref{eq:linear}. There are limits to what is worth doing with 6 data points, but you get the idea.
-\end{sloppypar} 
-
 \begin{thebibliography}{99} \addcontentsline{toc}{section}{References}
 \bibitem[Chakraborty(2019)Chakraborty]{uni} Chakraborty, B., Bhowmick, A. R., Chattopadhyay, J., and Bhattacharya, S. (2019) A novel unification method to characterize a broad class of growth curve models using relative growth rate. \emph{Bulletin of Mathematical Biology 81}(7) 2529--2552. (\url{https://doi.org/10.1007/s11538-019-00617-w}).
 
@@ -541,7 +546,10 @@ Forest stands as dynamical systems: An introduction. \emph{Modern Applied Scienc
 \bibitem[Garc\'ia(2019)Garc\'ia]{sdes} Garc\'ia, O. (2019) Estimating reducible stochastic differential equations by conversion to a least-squares problem. \emph{Computational Statistics}, 2019, 34, 23--46. (\url{https://doi.org/10.1007/s00180-018-0837-4}). 
 \end{thebibliography}
 
-\bigskip\today
+\bigskip
+\noindent Oscar García\\
+\today
+\\(First version: November 13, 2020) 
 
 %\bibliography{} \addcontentsline{toc}{section}{References}
 \end{document}

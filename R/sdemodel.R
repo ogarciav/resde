@@ -50,7 +50,7 @@ sdemodel <- function(phi=~x, phiprime=NULL, beta0=~beta0, beta1=~beta1,
 }
 
 
-#' Display model specification
+#' Display the model specification
 #'
 #' @param model  SDE model specification, as produced by sdemodel()
 #'
