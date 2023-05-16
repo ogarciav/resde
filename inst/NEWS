@@ -1,4 +1,4 @@
-Changes in version 1.1  (2023-05-10)
+Changes in version 1.1  (2023-05-15)
   - Version submitted to CRAN.
   - Minor improvements in vignette and other documentation.
   - Change cat() to message() in sdemodel_display().

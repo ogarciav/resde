@@ -231,7 +231,7 @@ A little more information can be extracted from the \code{nls{}} fit:
 <<>>=
 summary(f$fit)
 @
-
+Note that here \texttt{Residual standard error}, and \texttt{residual sum-of-squares} in \code{fit}, correspond to the values from \code{uvector()} and not to $h_i$ or $h_i^c$.
 
  
 \subsection{Example 2, single unit with multiplicative process noise}

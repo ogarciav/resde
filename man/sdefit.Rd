@@ -45,7 +45,9 @@ locals, or \code{'nlme'} for mixed effects.}
 \value{
 List with two components: a list \code{fit} containing the output from
          the optimizer (\code{nls} or \code{nlme}), and a list \code{more} containing
-         sigma estimates, log-likelihood, AIC and BIC.
+         sigma estimates, log-likelihood, AIC and BIC. Note that in \code{fit}, "residual sum-of-squares"
+         corresponds to \code{uvector}, not to \code{x} or \code{y}. Same for \code{nls}
+         methods like \code{fitted} or \code{residuals} applied to \code{fit}.
 }
 \description{
 ML estimation of parameters for a reducible SDE
