@@ -55,12 +55,10 @@
 #'
 #' @export
 #'
-#' @examples
-#' \dontrun{
-#' uvector(x=runif(5), t=1:5, unit = NULL, beta0=0, beta1=1, eta=0, eta0=0,
-#'  x0=0, t0=0, lambda=NULL)
-#' logdet.and.v(1:3, c(0,.2,.1), 3:1)
-#' }
+# @examples
+# uvector(x=runif(5), t=1:5, unit = NULL, beta0=0, beta1=1, eta=0, eta0=0,
+#  x0=0, t0=0, lambda=NULL)
+# logdet.and.v(1:3, c(0,.2,.1), 3:1)
 #' @usage uvector(x, t, unit = NULL, beta0, beta1, eta, eta0, x0, t0, lambda,
 #'   mum = 1, mu0 = 1, mup = 1, sorted = FALSE, final = FALSE)
 

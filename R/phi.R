@@ -1,6 +1,6 @@
 # File contents: userphi, userphiprime
 
-#' Optional external transformation and derivative functions
+#' Examples of optional external transformation and derivative functions
 #'
 #' Templates for user-supplied transformation and drivative functions, used by
 #'   \code{sdefit()} if specified in parameters \code{phi} and/or
@@ -13,9 +13,10 @@
 #'
 #' @return  Transformed variable
 #'
-#' @keywords internal
-#' @examples
-#' \dontrun{   userphi(20, list(a=70, c=0.5))   }
+#' @export
+# @keywords internal
+# @examples
+# userphi(20, list(a=70, c=0.5))
 
 userphi <- function(x, theta){
   with(theta,
@@ -27,10 +28,11 @@ userphi <- function(x, theta){
 #'
 #' @return  Transformation derivative
 #'
-#' @keywords internal
-#' @examples
-#' \dontrun{   userphiprime(20, list(a=70, c=0.5))   }
-#' 
+#' @export
+# @keywords internal
+# @examples
+# userphiprime(20, list(a=70, c=0.5))
+
 userphiprime <- function(x, theta){
   with(theta,
     c*(x/a)^(c-1)/a # substitute the code for your derivative here

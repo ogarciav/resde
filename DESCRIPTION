@@ -14,7 +14,7 @@ Description: Maximum likelihood estimation for univariate reducible
  fixed-effects or mixed-effects methods. Ref.: Garcia, O. (2019)
  "Estimating reducible stochastic differential equations by
  conversion to a least-squares problem", Computational Statistics
- 34(1): 23-46, <doi: 10.1007/s00180-018-0837-4>.
+ 34(1): 23-46, <doi:10.1007/s00180-018-0837-4>.
 License: GPL (>= 2)
 Encoding: UTF-8
 Roxygen: list(markdown = FALSE)

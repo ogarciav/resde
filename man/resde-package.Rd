@@ -45,4 +45,3 @@ Useful links:
 \strong{Maintainer}: Oscar Garcia \email{garcia@dasometrics.net} (\href{https://orcid.org/0000-0002-8995-1341}{ORCID})
 
 }
-\keyword{internal}

@@ -82,10 +82,3 @@ globals, as in the original, or in an environment named \code{trfuns}.
 \item \code{logdet.and.v()}: Logarithm of determinant, and \eqn{v} vector
 
 }}
-\examples{
-\dontrun{
-uvector(x=runif(5), t=1:5, unit = NULL, beta0=0, beta1=1, eta=0, eta0=0,
- x0=0, t0=0, lambda=NULL)
-logdet.and.v(1:3, c(0,.2,.1), 3:1)
-}
-}

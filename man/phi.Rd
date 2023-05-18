@@ -3,7 +3,7 @@
 \name{userphi}
 \alias{userphi}
 \alias{userphiprime}
-\title{Optional external transformation and derivative functions}
+\title{Examples of optional external transformation and derivative functions}
 \usage{
 userphi(x, theta)
 
@@ -31,9 +31,3 @@ Templates for user-supplied transformation and drivative functions, used by
 \item \code{userphiprime()}: derivative
 
 }}
-\examples{
-\dontrun{   userphi(20, list(a=70, c=0.5))   }
-\dontrun{   userphiprime(20, list(a=70, c=0.5))   }
-
-}
-\keyword{internal}

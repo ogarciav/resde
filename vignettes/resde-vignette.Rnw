@@ -102,7 +102,7 @@
 library(knitr)
 opts_chunk$set(fig.align='center', # fig.show='hold',
 dev='pdf', out.width='.45\\textwidth') # , highlight=FALSE)
-options(width=67)
+old_options <- options(width=67)
 @
 
 
@@ -535,6 +535,10 @@ Note: These identities are sometimes useful:
 Proof: Differentiate $F^{-1}[F(t)] = t$ or $F[F^{-1}(x)] = x$.
 
 For SDEs, it may be possible to linearize the deterministic part (aka the \emph{trend} or \emph{drift}). Or reduce to a constant the stochastic term (\emph{diffusion} or \emph{volatility}), through the Lamperti transform \citep[][sec.~3]{sdes}. In general, it is not possible to get the desired form for both, but often one of the terms is less important than the other. At any rate, there are good theoretical reasons for why linearity and Gaussianity should go well together.
+
+<<cleanup, include=FALSE, cache=FALSE>>=
+options(old_options)
+@
 
 
 \begin{thebibliography}{99} \addcontentsline{toc}{section}{References}

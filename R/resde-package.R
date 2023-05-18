@@ -25,7 +25,7 @@
 #'  equations by conversion to a least-squares problem". \emph{Computational
 #'  Statistics 34}(1), 23-46. \doi{10.1007/s00180-018-0837-4}
 
-#' @keywords internal
+# @keywords internal
 "_PACKAGE"
 
 ## usethis namespace: start
