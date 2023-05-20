@@ -6,7 +6,7 @@ spaced in time.
 Can fit multiple individuals/units with global and local
 parameters, by fixed-effects or mixed-effects methods.
 
-This is a beta version, with limited testing so far. Use with care.
+Current stable _resde_ version 1.1 on CRAN:  <https://cran.r-project.org/package=resde>
 
 ![unitran](grex.png)
 
@@ -14,11 +14,8 @@ The picture indicates growth curves that can be modelled with reducible SDEs, se
 
 ### Installation
 
-One way is to use
-`remotes::install_github("ogarciav/resde")`
-or
-`devtools::install_github("ogarciav/resde")`
-
+Get the stable version from CRAN:  `install.packages("resde")`\
+or with the RStudio menus: *Tools > Install Packages... > resde* 
 
 ### Demo
 
@@ -35,7 +32,7 @@ sdefit(m, x="height", t="age", data=tree, start=c(a=70, b=0.1, c=0.5))
 
 ### Vignette
 
-[Fitting Reducible SDE Models](https://www.researchgate.net/publication/344293978)
+[Fitting Reducible SDE Models.](https://cran.r-project.org/web/packages/resde/vignettes/resde-vignette.pdf)
 
 ### References
 
